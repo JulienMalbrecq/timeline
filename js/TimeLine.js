@@ -1,69 +1,75 @@
 var TimeLine = (function (doc, config) {
-    var ONEDAY = 86400000,
-        ONEHOUR = 3600000,
-        TimeLine = function (startDate, user) {
-            this.startDate = startDate;
-            this.user = user;
-
-            this.timeSlices = [];
-            this.element = createTimeLineElement(this);
-        };
+    var Line, TimeLine;
 
     function getDaysFromTile(tile) {
         return Math.floor(tile / config.slicesPerDay);
     }
 
-    function getTileFromOffset(offset) {
-        return Math.floor(offset / config.tileSize);
-    }
-
     function getTileFromDate(date, refDate) {
-        var startOfDay = new Date(date.getTime()),
+        var startOfDay = DateUtils.setHour(new Date(date.getTime()), config.startHour),
             timeDiff = date.getTime() - refDate.getTime(),
-            days = Math.floor(timeDiff/ONEDAY);
+            days = Math.floor(timeDiff/DateUtils.INTERVAL.ONEDAY);
 
-        startOfDay.setHours(config.startHour);
-        startOfDay.setMinutes(0);
-        startOfDay.setSeconds(0);
-        startOfDay.setMilliseconds(0);
-
-        return days * config.slicesPerDay + Math.floor((date.getTime() - startOfDay.getTime()) / ONEHOUR);
+        return days * config.slicesPerDay + Math.floor((date.getTime() - startOfDay.getTime()) / DateUtils.INTERVAL.ONEHOUR);
     }
 
     function getDateFromTile(refDate, tile) {
-        return new Date(refDate.getTime() + (ONEDAY * getDaysFromTile(tile)) + (ONEHOUR * (config.startHour + (tile % config.slicesPerDay))));
+        return new Date(refDate.getTime() + (DateUtils.INTERVAL.ONEDAY * getDaysFromTile(tile)) + (DateUtils.INTERVAL.ONEHOUR * (config.startHour + (tile % config.slicesPerDay))));
     }
 
-    function createTimeLineElement(timeLine) {
-        var element = doc.createElement('div');
-        element.addEventListener('mousedown', function (ev) {
-            timeLine.startDrag(getTileFromOffset(ev.offsetX));
-        });
+    function createTimeLineElement(line) {
+        var element = doc.createElement('div'),
+            registerLineInEvent = function (ev) {
+                ev.line = line;
+            };
 
-        element.addEventListener('mouseup', function (ev) {
-            timeLine.endDrag(getTileFromOffset(ev.offsetX));
-        });
+        element.addEventListener('mousedown', registerLineInEvent);
+        element.addEventListener('mousemove', registerLineInEvent);
+        element.addEventListener('mouseup', registerLineInEvent);
 
-        element.setAttribute('data-timeline', timeLine.user);
+        element.setAttribute('data-timeline', line.user);
         return element;
     }
 
+    Line = function (startDate, user) {
+        this.startDate = startDate;
+        this.user = user;
+    };
+
+    Line.prototype = {
+    };
+
+    TimeLine = function (wrapper, startDate) {
+        this.wrapper = wrapper;
+        this.startDate = startDate;
+    };
+
     TimeLine.prototype = {
-        startDrag: function (tile) {
-            this.dragData = {
-                startTile: tile
-            }
+        addGroup: function (name) {
+            var fragment = doc.createDocumentFragment(),
+                wrapper = doc.createElement('div'),
+                lineWrapper = doc.createElement('div'),
+                titleElement = doc.createElement('div'),
+                group = new TimeLine(lineWrapper, this.startDate);
+
+            wrapper.setAttribute('class', 'group-wrapper');
+            lineWrapper.setAttribute('class', 'line-wrapper');
+
+            titleElement.appendChild(doc.createTextNode(name));
+            wrapper.appendChild(titleElement);
+            wrapper.appendChild(lineWrapper);
+            fragment.appendChild(wrapper);
+
+            this.wrapper.appendChild(fragment);
+
+            return group;
         },
 
-        endDrag: function (tile) {
-            this.dragData.endTile = tile;
-            this.resolveDragData(this.dragData);
-        },
+        addLine: function (user) {
+            var line = new Line(this.startDate, user),
+                element = createTimeLineElement(line);
 
-        resolveDragData: function (dragData) {
-            console.log(this.user, 'start date: ', getDateFromTile(this.startDate, dragData.startTile));
-            console.log(this.user, 'end date: ', getDateFromTile(this.startDate, dragData.endTile));
-            console.log(this.user, 'reverse lookup of tile from end date', getTileFromDate(getDateFromTile(this.startDate, dragData.endTile), this.startDate));
+            this.wrapper.appendChild(element);
         }
     };
 

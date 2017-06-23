@@ -5,30 +5,29 @@
     <title>Timeline</title>
     <style>
         [data-timeline] {
-            height: 20px;
+            height: 19px;
             width: 100%;
             background: url(img/grid.png);
         }
     </style>
 </head>
 <body>
-    <div id="container">
+    <div id="timeline">
 
     </div>
 
+    <script src="js/utils/DateUtils.js"></script>
     <script src="js/TimeLine.js"></script>
+    <script src="js/TimeLineToolbox.js"></script>
     <script>
-        var refDate = new Date(),
-            tl = new TimeLine(refDate, 'Julien'),
-            tl2 = new TimeLine(refDate, 'Brieuc');
-
-        refDate.setHours(0);
-        refDate.setMinutes(0);
-        refDate.setSeconds(0);
-        refDate.setMilliseconds(0);
-
-        document.getElementById('container').appendChild(tl.element);
-        document.getElementById('container').appendChild(tl2.element);
+        var wrapper = document.getElementById('timeline'),
+            refDate = DateUtils.toMidnight(new Date()),
+            timeline = new TimeLine(wrapper, refDate),
+            toolBox = new TimeLineToolbox(timeline),
+            t3 = timeline.addLine('Ali'),
+            itGroup = timeline.addGroup('it'),
+            tl = itGroup.addLine('Julien'),
+            tl2 = itGroup.addLine('Brieuc');
     </script>
 </body>
 </html>
