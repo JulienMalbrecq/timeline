@@ -2,7 +2,7 @@ var TimeLine = (function (doc, config) {
     var Line, TimeLine;
 
     function getDaysFromTile(tile) {
-        return Math.floor(tile / config.slicesPerDay);
+        return Math.floor(tile / config.tilesPerDay);
     }
 
     function getTileFromDate(date, refDate) {
@@ -10,11 +10,7 @@ var TimeLine = (function (doc, config) {
             timeDiff = date.getTime() - refDate.getTime(),
             days = Math.floor(timeDiff/DateUtils.INTERVAL.ONEDAY);
 
-        return days * config.slicesPerDay + Math.floor((date.getTime() - startOfDay.getTime()) / DateUtils.INTERVAL.ONEHOUR);
-    }
-
-    function getDateFromTile(refDate, tile) {
-        return new Date(refDate.getTime() + (DateUtils.INTERVAL.ONEDAY * getDaysFromTile(tile)) + (DateUtils.INTERVAL.ONEHOUR * (config.startHour + (tile % config.slicesPerDay))));
+        return days * config.tilesPerDay + Math.floor((date.getTime() - startOfDay.getTime()) / DateUtils.INTERVAL.ONEHOUR);
     }
 
     function createTimeLineElement(line) {
@@ -34,9 +30,6 @@ var TimeLine = (function (doc, config) {
     Line = function (startDate, user) {
         this.startDate = startDate;
         this.user = user;
-    };
-
-    Line.prototype = {
     };
 
     TimeLine = function (wrapper, startDate) {
@@ -69,9 +62,15 @@ var TimeLine = (function (doc, config) {
             var line = new Line(this.startDate, user),
                 element = createTimeLineElement(line);
 
+            line.wrapper = element;
+
             this.wrapper.appendChild(element);
+        },
+
+        getDateFromTile: function (tile) {
+            return new Date(this.startDate.getTime() + (DateUtils.INTERVAL.ONEDAY * getDaysFromTile(tile)) + (DateUtils.INTERVAL.ONEHOUR * (config.startHour + (tile % config.tilesPerDay))));
         }
     };
 
     return TimeLine;
-})(document, {startHour: 8, slicesPerDay: 8, tileSize: 20});
+})(document, MainConfig);

@@ -4,30 +4,117 @@
     <meta charset="UTF-8">
     <title>Timeline</title>
     <style>
+        body {
+            user-select: none;
+        }
+
+        #timeline {
+            position: relative;
+        }
+
         [data-timeline] {
             height: 19px;
             width: 100%;
             background: url(img/grid.png);
+            position: relative;
+        }
+
+        .toggle-button {
+            display: inline-block;
+            border: solid 1px;
+        }
+
+        .toggle-button.active {
+            background: #000;
+            color: #FFF;
+        }
+
+        .time-slice {
+            position: absolute;
+            background: #FC0;
+            height: 17px;
+            pointer-events: none;
+            border-radius: 10px;
+            border: solid 1px #b38900;
+            box-shadow: 0 3px 6px rgba(0,0,0,.2);
         }
     </style>
 </head>
 <body>
+    <ul id="toolbar">
+        <li><a href="#" data-tool="create" class="toggle-button">Create</a></li>
+        <li><a href="#" data-tool="move" class="toggle-button">Move</a></li>
+    </ul>
+
     <div id="timeline">
 
     </div>
 
+    <script>
+        var MainConfig = {startHour: 8, tilesPerDay: 8, tileSize: 19};
+    </script>
+
+    <script src="js/utils/Utils.CSS.js"></script>
     <script src="js/utils/DateUtils.js"></script>
+    <script src="js/MouseStateListener.js"></script>
     <script src="js/TimeLine.js"></script>
+    <script src="js/TimeLineRenderer.js"></script>
     <script src="js/TimeLineToolbox.js"></script>
+    <script src="js/TimeSlice.js"></script>
     <script>
         var wrapper = document.getElementById('timeline'),
             refDate = DateUtils.toMidnight(new Date()),
-            timeline = new TimeLine(wrapper, refDate),
-            toolBox = new TimeLineToolbox(timeline),
-            t3 = timeline.addLine('Ali'),
-            itGroup = timeline.addGroup('it'),
-            tl = itGroup.addLine('Julien'),
-            tl2 = itGroup.addLine('Brieuc');
+            timeLine = new TimeLine(wrapper, refDate),
+            renderer = new TimeLineRenderer(wrapper, refDate),
+            toolBox = new TimeLineToolbox(timeLine),
+            itGroup = timeLine.addGroup('it'),
+            moveTool = toolBox.createTool('move'),
+            createTool = toolBox.createTool('create'),
+            createButtons = document.querySelectorAll('[data-tool=create]'),
+            moveButtons = document.querySelectorAll('[data-tool=move]'),
+            b, tmp;
+
+        itGroup.addLine('Julien');
+        itGroup.addLine('Brieuc');
+
+        for (var i = 0; i < 500; i += 1) {
+            timeLine.addLine(i);
+        }
+
+        createTool.mousedown = function (line, tile) {
+            if (line === undefined) {
+                return;
+            }
+
+            var date = timeLine.getDateFromTile(tile);
+            tmp = TimeSliceFactory.create('', date, date);
+            renderer.addSlice(tmp, line);
+        };
+
+        createTool.mousemove = function (line, tile) {
+            var date = timeLine.getDateFromTile(tile);
+            if (date >= tmp.startDate) {
+                tmp.endDate = date;
+            }
+
+            renderer.refresh();
+        };
+
+        createTool.mouseup = function (line, tile) {
+            renderer.refresh();
+        };
+
+        for (b = 0; b < createButtons.length; b += 1) {
+            toolBox.attachButton(createTool, createButtons[b]);
+        }
+
+        for (b = 0; b < moveButtons.length; b += 1) {
+            toolBox.attachButton(moveTool, moveButtons[b]);
+        }
+
+
+
+
     </script>
 </body>
 </html>

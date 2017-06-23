@@ -20,5 +20,13 @@ var DateUtils = {
 
     toMidnight: function (date) {
         return DateUtils.setHour(date, 0);
+    },
+
+    tileFromDate: function (date, refDate, startHour, tilePerDay) {
+        var startOfDay = DateUtils.setHour(new Date(date.getTime()), startHour),
+            timeDiff = date.getTime() - refDate.getTime(),
+            days = Math.floor(timeDiff/DateUtils.INTERVAL.ONEDAY);
+
+        return days * tilePerDay + Math.floor((date.getTime() - startOfDay.getTime()) / DateUtils.INTERVAL.ONEHOUR);
     }
 };
