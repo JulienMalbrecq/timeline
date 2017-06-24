@@ -1,6 +1,7 @@
 var TimeSliceFactory = (function () {
-    var TimeSlice = function (project, startDate, endDate) {
+    var TimeSlice = function (project, user, startDate, endDate) {
             this.project = project;
+            this.user = user;
             this.startDate = startDate;
             this.endDate = endDate;
         };
@@ -8,8 +9,8 @@ var TimeSliceFactory = (function () {
     TimeSlice.prototype = {};
 
     return {
-        create : function (project, startDate, endDate) {
-            return new TimeSlice(project, startDate, endDate);
+        create : function (project, user, startDate, endDate) {
+            return new TimeSlice(project, user, startDate, endDate);
         }
     };
 })();

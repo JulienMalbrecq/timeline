@@ -86,8 +86,12 @@ var OverlapResolver = (function (){
     }
 
     OverlapResolver.prototype = {
+        isOverlapping: function (refSlice, newSlice) {
+            return computeOverlapScore(refSlice, newSlice) > 0;
+        },
+
         resolve: function (refSlice, newSlice) {
-            if (isOverlapping(refSlice, newSlice)) {
+            if (this.isOverlapping(refSlice, newSlice)) {
                 var event = refSlice.project === newSlice.project
                     ? resolveMerge(refSlice, newSlice)
                     : resolveOverlap(refSlice, newSlice);

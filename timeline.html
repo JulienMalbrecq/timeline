@@ -31,12 +31,17 @@
 
         .time-slice {
             position: absolute;
-            background: #FC0;
-            height: 17px;
+            height: 19px;
+            line-height: 19px;
+
             pointer-events: none;
             border-radius: 10px;
-            border: solid 1px #b38900;
             box-shadow: 0 3px 6px rgba(0,0,0,.2);
+
+            text-align: center;
+            font-size: 10px;
+            font-family: Arial, Helvetica, sans-serif;
+            overflow: hidden;
         }
     </style>
 </head>
@@ -57,13 +62,16 @@
     <script src="js/utils/Utils.CSS.js"></script>
     <script src="js/utils/DateUtils.js"></script>
     <script src="js/MouseStateListener.js"></script>
+    <script src="js/OverlapResolver.js"></script>
     <script src="js/TimeLine.js"></script>
     <script src="js/TimeLineRenderer.js"></script>
     <script src="js/TimeLineToolbox.js"></script>
+    <script src="js/Project.js"></script>
     <script src="js/TimeSlice.js"></script>
     <script>
         var wrapper = document.getElementById('timeline'),
             refDate = DateUtils.toMidnight(new Date()),
+            overlapResolver = new OverlapResolver(),
             timeLine = new TimeLine(wrapper, refDate),
             renderer = new TimeLineRenderer(wrapper, refDate),
             toolBox = new TimeLineToolbox(timeLine),
@@ -72,7 +80,11 @@
             createTool = toolBox.createTool('create'),
             createButtons = document.querySelectorAll('[data-tool=create]'),
             moveButtons = document.querySelectorAll('[data-tool=move]'),
-            b, tmp;
+            b, tmp,
+            playandgold = ProjectFactory.create('Play&Gold', '#FC0'),
+            antargaz = ProjectFactory.create('Antargaz', '#0F0'),
+            currentProject = playandgold,
+            timeSlices = [];
 
         itGroup.addLine('Julien');
         itGroup.addLine('Brieuc');
@@ -87,7 +99,7 @@
             }
 
             var date = timeLine.getDateFromTile(tile);
-            tmp = TimeSliceFactory.create('', date, date);
+            tmp = TimeSliceFactory.create(currentProject, line.user, date, date);
             renderer.addSlice(tmp, line);
         };
 
@@ -101,7 +113,35 @@
         };
 
         createTool.mouseup = function (line, tile) {
-            renderer.refresh();
+            var findOverlap = function (timeSlice) {
+                    return timeSlice.user === tmp.user && overlapResolver.isOverlapping(timeSlice, tmp);
+                },
+                sameProjectFilter = function (timeSlice) {
+                    return timeSlice.project === tmp.project;
+                },
+                overlapping = timeSlices.filter(findOverlap),
+                sameProjectOverlapping = overlapping.filter(sameProjectFilter);
+
+            if (overlapping.length > 0) {
+                if (overlapping.length === sameProjectOverlapping.length) {
+                    overlapping.forEach(function (refSlice) {
+                        if (tmp.project === refSlice.project) {
+                            overlapResolver.resolve(refSlice, tmp);
+                            tmp.startDate = refSlice.startDate;
+                            tmp.endDate = refSlice.endDate;
+                        }
+                    });
+
+                    renderer.refresh();
+                }
+
+                renderer.removeSlice(tmp);
+                tmp = null;
+            } else {
+                timeSlices.push(tmp);
+                renderer.refresh();
+            }
+
         };
 
         for (b = 0; b < createButtons.length; b += 1) {
@@ -111,8 +151,6 @@
         for (b = 0; b < moveButtons.length; b += 1) {
             toolBox.attachButton(moveTool, moveButtons[b]);
         }
-
-
 
 
     </script>

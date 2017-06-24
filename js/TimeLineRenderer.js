@@ -8,9 +8,11 @@ var TimeLineRenderer = (function (doc, config) {
     TimeLineRenderer.prototype = {
         addSlice: function (timeSlice, line) {
             var element = doc.createElement('div');
+            element.appendChild(doc.createTextNode(timeSlice.project.name));
+
             element.setAttribute('class', 'time-slice');
             element.style.top = line.wrapper.offsetTop + 'px';
-            wrapper.appendChild(element);
+            this.wrapper.appendChild(element);
 
             this.slices.push({
                 element: element,
@@ -19,6 +21,14 @@ var TimeLineRenderer = (function (doc, config) {
             });
 
             this.refresh();
+        },
+
+        removeSlice: function (timeSlice) {
+            var slice = this.slices.findIndex(function (slice) { return slice.timeSlice === timeSlice; });
+            if (slice >= 0) {
+                this.wrapper.removeChild(this.slices[slice].element);
+                this.slices.splice(slice, 1);
+            }
         },
 
         refresh: function () {
@@ -30,7 +40,7 @@ var TimeLineRenderer = (function (doc, config) {
 
                 slice.element.style.width = (totalTiles * config.tileSize) + 'px';
                 slice.element.style.left = (startTile * config.tileSize) + 'px';
-
+                slice.element.style.backgroundColor = slice.timeSlice.project.color;
             });
         }
     };
