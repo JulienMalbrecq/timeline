@@ -21,13 +21,9 @@ var TimeLineToolbox = (function(mouse, config) {
     }
 
     function disableAll(tools) {
-        var tool;
-
-        for (tool in tools) {
-            if (tools.hasOwnProperty(tool)) {
-                tools[tool].active = false;
-            }
-        }
+        Object.keys(tools).forEach(function (toolName) {
+            tools[toolName].active = false;
+        });
     }
 
     function getActiveTool(tools) {

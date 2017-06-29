@@ -40,6 +40,7 @@ var TimeLineRenderer = (function (doc, config) {
 
                 slice.element.style.width = (totalTiles * config.tileSize) + 'px';
                 slice.element.style.left = (startTile * config.tileSize) + 'px';
+                slice.element.style.top = slice.line.wrapper.offsetTop + 'px';
                 slice.element.style.backgroundColor = slice.timeSlice.project.color;
             });
         }
