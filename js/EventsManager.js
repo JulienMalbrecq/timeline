@@ -82,7 +82,6 @@ var EventsManager = (function () {
 
     EventsManager = function(config) {
         // default config
-        this.debug = false;
         this.private = false;
 
         if (config !== undefined) {

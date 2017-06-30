@@ -99,4 +99,4 @@ var TimeLineToolbox = (function(mouse, config) {
     };
 
     return TimeLineToolbox;
-})(MouseStateListener, MainConfig);
+})(MouseStateListener, MainConfig.timeline);

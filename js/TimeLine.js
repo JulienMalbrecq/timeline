@@ -73,4 +73,4 @@ var TimeLine = (function (doc, config) {
     };
 
     return TimeLine;
-})(document, MainConfig);
+})(document, MainConfig.timeline);

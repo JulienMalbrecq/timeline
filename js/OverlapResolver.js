@@ -1,5 +1,5 @@
 var OverlapResolver = (function (){
-    var OverlapResolver = function () {},
+    var OverlapResolver = function (eventManager) { this.eventManager = eventManager; },
         ONEHOUR = 3600000,
         flags = {
             REF_START: 1,
@@ -13,6 +13,18 @@ var OverlapResolver = (function (){
             OVERLAP_END: flags.REF_END | flags.NEW_START,
             WITHIN: flags.NEW_START | flags.NEW_END
         };
+
+    OverlapResolver.resolutionType = {
+        RESOLUTION_WITHIN: 0,
+        RESOLUTION_OVERLAP_START: 1,
+        RESOLUTION_OVERLAP_END: 2,
+        RESOLUTION_SURROUND: 3
+    };
+
+    OverlapResolver.event = {
+        RESOLVED_OVERLAP: 'overlap-resolver-resolved-overlap',
+        RESOLVED_MERGE: 'overlap-resolver-resolved-overlap'
+    };
 
     function isWithinRange (refSlice, searchDate) {
         return searchDate >= refSlice.startDate && searchDate <= refSlice.endDate;
@@ -44,45 +56,51 @@ var OverlapResolver = (function (){
         return (score & mask) === mask;
     }
 
-    function isOverlapping (refSlice, newSlice) {
-        return computeOverlapScore(refSlice, newSlice) === 0;
-    }
-
     function resolveMerge(refSlice, newSlice) {
-        var score = computeOverlapScore(refSlice, newSlice);
+        var score = computeOverlapScore(refSlice, newSlice),
+            resolution = [refSlice, newSlice];
 
         if (compareAgainstMask(score, masks.WITHIN)) {
-            // return 'within' event
+            resolution.push(OverlapResolver.resolutionType.RESOLUTION_WITHIN);
         } else if (compareAgainstMask(score, masks.OVERLAP_START)) {
             refSlice.startDate = newSlice.startDate;
-            // return 'overlap_start' event
+            resolution.push(OverlapResolver.resolutionType.RESOLUTION_OVERLAP_START);
         } else if (compareAgainstMask(score, masks.OVERLAP_END)) {
             refSlice.endDate = newSlice.endDate;
-            // return 'overlap_end' event
+            resolution.push(OverlapResolver.resolutionType.RESOLUTION_OVERLAP_END);
         } else if (compareAgainstMask(score, masks.SURROUND)) {
             refSlice.startDate = newSlice.startDate;
             refSlice.endDate = newSlice.endDate;
-            // return 'surround' event
+            resolution.push(OverlapResolver.resolutionType.RESOLUTION_SURROUND);
+        } else {
+            resolution = null;
         }
+
+        return resolution;
     }
 
     function resolveOverlap(refSlice, newSlice) {
-        var score = computeOverlapScore(refSlice, newSlice);
+        var score = computeOverlapScore(refSlice, newSlice),
+            resolution = [refSlice, newSlice],
+            duplicate;
+
         if (compareAgainstMask(score, masks.WITHIN)) {
-            // return 'within' event
+            resolution.push(OverlapResolver.resolutionType.RESOLUTION_WITHIN);
         } else if (compareAgainstMask(score, masks.OVERLAP_START)) {
             refSlice.startDate.setTime(newSlice.endDate.getTime() + ONEHOUR);
-            // return 'overlap_start' event
+            resolution.push(OverlapResolver.resolutionType.RESOLUTION_OVERLAP_START);
         } else if (compareAgainstMask(score, masks.OVERLAP_END)) {
             refSlice.endDate.setTime(newSlice.startDate.getTime() - ONEHOUR);
-            // return 'overlap_end' event
+            resolution.push(OverlapResolver.resolutionType.RESOLUTION_OVERLAP_END);
         } else {
-            var duplicate = TimeSliceFactory.create(refSlice.project, refSlice.startDate, refSlice.endDate);
-
+            duplicate = TimeSliceFactory.create(refSlice.project, refSlice.startDate, refSlice.endDate);
             duplicate.startDate.setTime(newSlice.endDate.getTime() + ONEHOUR);
             refSlice.endDate.setTime(newSlice.startDate.getTime() - ONEHOUR);
-            // return 'surround' event
+            resolution.push(OverlapResolver.resolutionType.RESOLUTION_SURROUND);
+            resolution.push(duplicate);
         }
+
+        return duplicate;
     }
 
     OverlapResolver.prototype = {
@@ -91,15 +109,20 @@ var OverlapResolver = (function (){
         },
 
         resolve: function (refSlice, newSlice) {
+            var event, resolution;
             if (this.isOverlapping(refSlice, newSlice)) {
-                var event = refSlice.project === newSlice.project
+                event = refSlice.project === newSlice.project
+                    ? OverlapResolver.event.RESOLVED_MERGE
+                    : OverlapResolver.event.RESOLVED_OVERLAP;
+
+                resolution = refSlice.project === newSlice.project
                     ? resolveMerge(refSlice, newSlice)
                     : resolveOverlap(refSlice, newSlice);
-                // dispatch event
+
+                this.eventManager.fire(event, resolution);
             }
         }
     };
 
     return OverlapResolver;
 })();
-

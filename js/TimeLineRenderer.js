@@ -47,4 +47,4 @@ var TimeLineRenderer = (function (doc, config) {
     };
 
     return TimeLineRenderer;
-})(document, MainConfig);
+})(document, MainConfig.timeline);
