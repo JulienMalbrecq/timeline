@@ -111,14 +111,8 @@ var OverlapResolver = (function (){
         resolve: function (refSlice, newSlice) {
             var event, resolution;
             if (this.isOverlapping(refSlice, newSlice)) {
-                event = refSlice.project === newSlice.project
-                    ? OverlapResolver.event.RESOLVED_MERGE
-                    : OverlapResolver.event.RESOLVED_OVERLAP;
-
-                resolution = refSlice.project === newSlice.project
-                    ? resolveMerge(refSlice, newSlice)
-                    : resolveOverlap(refSlice, newSlice);
-
+                event = refSlice.project === newSlice.project ? OverlapResolver.event.RESOLVED_MERGE : OverlapResolver.event.RESOLVED_OVERLAP;
+                resolution = refSlice.project === newSlice.project ? resolveMerge(refSlice, newSlice) : resolveOverlap(refSlice, newSlice);
                 this.eventManager.fire(event, resolution);
             }
         }

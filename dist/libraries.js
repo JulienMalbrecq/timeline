@@ -1,3 +1,4 @@
+2017-07-03
 var EventsManager = (function () {
     var EventsManager,
         CustomEvent,
@@ -64,7 +65,7 @@ var EventsManager = (function () {
         },
 
         removeCallback: function(eventCallback) {
-            var index = this.callbacks.findIndex(function (callback) { return callback === eventCallback });
+            var index = this.callbacks.findIndex(function (callback) { return callback === eventCallback; });
             if (index > -1) {
                 this.callbacks.splice(index, 1);
             }
@@ -104,7 +105,7 @@ var EventsManager = (function () {
     EventsManager.prototype = {
         bind: function(eventName, callback) {
             //- check if 'eventName' is already defined
-            if (false == this.hasEvent(eventName)) {
+            if (false === this.hasEvent(eventName)) {
                 this.events[eventName] = new CustomEvent(eventName);
             }
 
@@ -161,9 +162,7 @@ var EventsManager = (function () {
         },
 
         disableEvent: function(eventName, disabled) {
-            this.getEvent(eventName).enabled = disabled === undefined
-                ? false
-                : !disabled
+            this.getEvent(eventName).enabled = disabled === undefined ? false : !disabled
             ;
         },
 
@@ -174,3 +173,100 @@ var EventsManager = (function () {
 
     return EventsManager;
 })();
+
+var MouseStateListener = (function () {
+    var mouseIsDown = false,
+        MouseStateListener = function () {},
+        html = document.getElementsByTagName('html')[0];
+
+    html.addEventListener('mousedown', function () { mouseIsDown = true; });
+    html.addEventListener('mouseup', function () { mouseIsDown = false; });
+
+    MouseStateListener.prototype = {
+        isDown: function () { return mouseIsDown; }
+    };
+
+    return new MouseStateListener();
+})();
+var DateUtils = {
+    INTERVAL: {
+        ONEMINUTE: 60000,
+        ONEHOUR: 3600000,
+        ONEDAY: 86400000
+    },
+
+    setHour: function(date, hour, minutes, seconds, milliseconds) {
+        minutes = minutes || 0;
+        seconds = seconds || 0;
+        milliseconds = milliseconds || 0;
+
+        date.setHours(hour);
+        date.setMinutes(minutes);
+        date.setSeconds(seconds);
+        date.setMilliseconds(milliseconds);
+
+        return date;
+    },
+
+    toMidnight: function (date) {
+        return DateUtils.setHour(date, 0);
+    },
+
+    tileFromDate: function (date, refDate, startHour, tilePerDay) {
+        var startOfDay = DateUtils.setHour(new Date(date.getTime()), startHour),
+            timeDiff = date.getTime() - refDate.getTime(),
+            days = Math.floor(timeDiff/DateUtils.INTERVAL.ONEDAY);
+
+        return days * tilePerDay + Math.floor((date.getTime() - startOfDay.getTime()) / DateUtils.INTERVAL.ONEHOUR);
+    }
+};
+var Utils = Utils || {};
+Utils.CSS = {
+    manipulateClassNames: function (element, className, add) {
+        add = add === undefined ? true : add;
+        var classes = (element.className || '')
+                .trim().split(' ')
+                .filter(function (currentClass) {
+                    return currentClass !== className;
+            });
+        
+        if (add) {
+            classes.push(className);
+        }
+
+        element.className = classes.join(' ').trim();
+    },
+
+    batchAction: function (elements, className, add) {
+        if (!Array.isArray(elements)) {
+            elements = [elements];
+        }
+
+        var i = 0,
+            total = elements.length;
+
+        for (; i < total; i += 1) {
+            Utils.CSS.manipulateClassNames(elements[i], className, add);
+        }
+    },
+
+    addClass: function (element, className) {
+        Utils.CSS.batchAction(element, className, true);
+    },
+
+    removeClass: function (element, className) {
+        Utils.CSS.batchAction(element, className, false);
+    },
+
+    toggleClass: function (element, className) {
+        var add = !Utils.CSS.hasClass(element, className);
+        Utils.CSS.batchAction(element, className, add);
+    },
+
+    hasClass: function (element, className) {
+        return (element.className || '')
+            .trim()
+            .split(' ')
+            .filter(function(currentClass) { return currentClass === className; }).length > 0;
+    }
+};
