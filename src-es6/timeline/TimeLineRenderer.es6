@@ -1,4 +1,4 @@
-import tileFromDate from 'lib/utils/Date';
+import {tileFromDate} from '../lib/utils/Date';
 
 export default class TimeLineRenderer {
     constructor(wrapper, refDate) {
@@ -31,12 +31,15 @@ export default class TimeLineRenderer {
         this.slices.forEach(slice => {
             let startTile = tileFromDate(slice.timeSlice.startDate, this.refDate, config.startHour, config.tilesPerDay),
                 endTile = tileFromDate(slice.timeSlice.endDate, this.refDate, config.startHour, config.tilesPerDay) + 1,
-                totalTiles = endTile - startTile;
+                totalTiles = endTile - startTile,
+                style = {
+                    width: `${totalTiles * config.tileSize}px`,
+                    left: `${startTile * config.tileSize}px`,
+                    top: `${slice.line.wrapper.offsetTop}px`,
+                    backgroundColor: `${slice.timeSlice.project.color}px`
+                };
 
-            slice.element.style.width = (totalTiles * config.tileSize) + 'px';
-            slice.element.style.left = (startTile * config.tileSize) + 'px';
-            slice.element.style.top = slice.line.wrapper.offsetTop + 'px';
-            slice.element.style.backgroundColor = slice.timeSlice.project.color;
+            Object.assign(slice.element.style, style);
         });
     }
 }

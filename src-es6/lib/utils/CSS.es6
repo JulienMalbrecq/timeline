@@ -1,4 +1,4 @@
-var batchAction = function (elements, className, add) {
+let batchAction = function (elements, className, add) {
     if (!Array.isArray(elements)) {
         elements = [elements];
     }
@@ -9,7 +9,7 @@ var batchAction = function (elements, className, add) {
     }
 };
 
-export var manipulateClassNames = function (element, className, add = true) {
+export let manipulateClassNames = function (element, className, add = true) {
     let classes = (element.className || '')
         .trim().split(' ')
         .filter(currentClass => currentClass !== className);
@@ -21,19 +21,19 @@ export var manipulateClassNames = function (element, className, add = true) {
     element.className = classes.join(' ').trim();
 };
 
-export var addClass =function (element, className) {
+export let addClass =function (element, className) {
     batchAction(element, className, true);
 };
 
-export var removeClass = function (element, className) {
+export let removeClass = function (element, className) {
     batchAction(element, className, false);
 };
 
-export var toggleClass = function (element, className) {
+export let toggleClass = function (element, className) {
     batchAction(element, className, hasClass(element, className));
 };
 
-export var hasClass = function (element, className) {
+export let hasClass = function (element, className) {
     return (element.className || '')
         .trim()
         .split(' ')

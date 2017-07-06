@@ -1,11 +1,11 @@
-import INTERVAL from 'lib/utils/Date';
+import {INTERVAL} from '../lib/utils/Date';
 
 function getDaysFromTile(tile) {
     return Math.floor(tile / config.tilesPerDay);
 }
 
 function createTimeLineElement(line) {
-    var element = document.createElement('div'),
+    let element = document.createElement('div'),
         registerLineInEvent = function (ev) {
             ev.line = line;
         };
@@ -24,7 +24,7 @@ class Line {
     }
 }
 
-export class TimeLine {
+export default class TimeLine {
     constructor (wrapper, startDate) {
         this.wrapper = wrapper;
         this.startDate = startDate;

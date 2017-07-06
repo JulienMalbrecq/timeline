@@ -1,13 +1,34 @@
+//import * as fermata from 'fermata';
+
+let resourceServer = function () {};
+// let resourceServer = fermata.json(config.resourceServer);
+
 export default class TimeLineDataManager {
-    constructor  (eventManager) {
+    constructor  (resourceName, eventManager) {
         this.eventManager = eventManager;
+        this.resourceServer = resourceServer[resourceName];
     }
 
-    load (serviceName, options, callback) {
-        if (false === serviceName in config) {
-            throw 'Unknown service ' + serviceName;
-        }
+    findAll() {
+        return this.findBy();
+    }
 
-        // use fermata here
+    find (id) {
+        return this.findBy({id});
+    }
+
+    findBy (options = {}) {
+        return new Promise((resolve, refuse) => {
+            this.resourceServer(options).get((error, data) => {
+                if (error) {
+                    refuse(error);
+                } else {
+                    resolve(this.parseData(data))
+                }});
+        });
+    }
+
+    parseData (data) {
+        return data;
     }
 }

@@ -9,36 +9,24 @@ module.exports = function(grunt) {
     },
     banner: '<%= grunt.template.today("yyyy-mm-dd") %>\n',
     // Task configuration.
-
-
-    babel: {
-      options: {
-        sourceMap: true,
-        presets: ['es2015']
-      },
+    browserify: {
       dist: {
         files: {
-          'dist/es5.js': 'src/es6.js'
+          'dist/app.js': ['compiled/**/*.js']
+        },
+        options: {
+            debug: false
         }
       }
     },
-
     concat: {
       options: {
         banner: '<%= banner %>',
         stripBanners: true
       },
-	  lib: {
-		  src: ['src/lib/**/*.js'],
-		  dest: 'dist/libraries.js'
-	  },
-	  vendors: {
-		  src: ['src/vendor/**/*.js'],
-		  dest: 'dist/vendors.js'
-	  },
-      timeline: {
-        src: ['src/timeline/**/*.js'],
-        dest: 'dist/timeline.js'
+	  timeline: {
+        src: ['compiled/**/*.js'],
+        dest: 'dist/app.js'
       }
     },
     uglify: {
@@ -70,7 +58,7 @@ module.exports = function(grunt) {
         src: 'Gruntfile.js'
       },
 	  timeline: {
-		  src: 'src/**/*.js'
+		  src: 'compiled/**/*.js'
 	  }
     },
     watch: {
@@ -87,6 +75,7 @@ module.exports = function(grunt) {
 
   // These plugins provide necessary tasks.
   grunt.loadNpmTasks('grunt-babel');
+  grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-qunit');
@@ -94,7 +83,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   // Default task.
-  grunt.registerTask('default', ['jshint', 'concat', 'uglify']);
+  grunt.registerTask('default', ['browserify', 'uglify']);
   grunt.registerTask('babel', ['babel']);
 
 };

@@ -1,6 +1,7 @@
-import INTERVAL from 'lib/utils/Date';
+import {INTERVAL} from '../lib/utils/Date';
+import TimeSliceFactory from './data/TimeSlice';
 
-var flags = {
+let flags = {
         REF_START: 1,
         REF_END: 2,
         NEW_START: 4,
@@ -13,14 +14,14 @@ var flags = {
         WITHIN: flags.NEW_START | flags.NEW_END
     };
 
-export var resolutionType = {
+export let resolutionType = {
     RESOLUTION_WITHIN: 0,
     RESOLUTION_OVERLAP_START: 1,
     RESOLUTION_OVERLAP_END: 2,
     RESOLUTION_SURROUND: 3
 };
 
-export var event = {
+export let event = {
     RESOLVED_OVERLAP: 'overlap-resolver-resolved-overlap',
     RESOLVED_MERGE: 'overlap-resolver-resolved-overlap'
 };
@@ -30,7 +31,7 @@ function isWithinRange (refSlice, searchDate) {
 }
 
 function computeOverlapScore (refSlice, newSlice) {
-    var score = 0;
+    let score = 0;
 
     if (isWithinRange(newSlice, refSlice.startDate)) {
         score |= flags.REF_START;
@@ -56,7 +57,7 @@ function compareAgainstMask(score, mask) {
 }
 
 function resolveMerge(refSlice, newSlice) {
-    var score = computeOverlapScore(refSlice, newSlice),
+    let score = computeOverlapScore(refSlice, newSlice),
         resolution = [refSlice, newSlice];
 
     if (compareAgainstMask(score, masks.WITHIN)) {
@@ -79,7 +80,7 @@ function resolveMerge(refSlice, newSlice) {
 }
 
 function resolveOverlap(refSlice, newSlice) {
-    var score = computeOverlapScore(refSlice, newSlice),
+    let score = computeOverlapScore(refSlice, newSlice),
         resolution = [refSlice, newSlice],
         duplicate;
 
