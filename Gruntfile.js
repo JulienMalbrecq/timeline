@@ -9,6 +9,20 @@ module.exports = function(grunt) {
     },
     banner: '<%= grunt.template.today("yyyy-mm-dd") %>\n',
     // Task configuration.
+
+
+    babel: {
+      options: {
+        sourceMap: true,
+        presets: ['es2015']
+      },
+      dist: {
+        files: {
+          'dist/es5.js': 'src/es6.js'
+        }
+      }
+    },
+
     concat: {
       options: {
         banner: '<%= banner %>',
@@ -72,6 +86,7 @@ module.exports = function(grunt) {
   });
 
   // These plugins provide necessary tasks.
+  grunt.loadNpmTasks('grunt-babel');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-qunit');
@@ -80,5 +95,6 @@ module.exports = function(grunt) {
 
   // Default task.
   grunt.registerTask('default', ['jshint', 'concat', 'uglify']);
+  grunt.registerTask('babel', ['babel']);
 
 };
