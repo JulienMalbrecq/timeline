@@ -1,11 +1,11 @@
 export class TimeSlice {
-    constructor (project, user, startDate, endDate) {
+    constructor (project, user, startDate, endDate, changed = true) {
         this._project = project;
         this._user = user;
         this._startDate = startDate;
         this._endDate = endDate;
 
-        this.changed = true;
+        this.changed = changed;
     }
 
     get project   () { return this._project; }
@@ -13,10 +13,10 @@ export class TimeSlice {
     get startDate () { return this._startDate; }
     get endDate   () { return this._endDate; }
 
-    set project   (project) { this._project = project; }
-    set user      (user) { this._user = user; }
-    set startDate (startDate) { this._startDate = project; }
-    set endDate   (endDate) { this._project = project; }
+    set project   (project) { this._project = project; this.changed = true; }
+    set user      (user) { this._user = user; this.changed = true; }
+    set startDate (startDate) { this._startDate = startDate; this.changed = true; }
+    set endDate   (endDate) { this._project = endDate; this.changed = true; }
 }
 
 export default class TimeSliceFactory {
