@@ -21,6 +21,7 @@ class Line {
     constructor (startDate, user) {
         this.startDate = startDate;
         this.user = user;
+        this._currentProject = null;
     }
 }
 
@@ -61,4 +62,6 @@ export default class TimeLine {
     getDateFromTile (tile) {
         return new Date(this.startDate.getTime() + (INTERVAL.ONEDAY * getDaysFromTile(tile)) + (INTERVAL.ONEHOUR * (config.startHour + (tile % config.tilesPerDay))));
     }
+
+    get currentProject() { return this._currentProject; }
 }

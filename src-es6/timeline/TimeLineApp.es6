@@ -19,6 +19,8 @@ class TimeLineApp {
         this.timeLine = new TimeLine(wrapper, refDate);
         this.renderer = new TimeLineRenderer(wrapper, refDate);
 
+        TimeSliceFactory.eventsManager = this.eventManager;
+
         this.toolBox = new TimeLineToolbox(this.timeLine, new MouseStateListener(document.querySelector('html')));
 
         // add a data manager which will manage the loading and rendering of the timelines

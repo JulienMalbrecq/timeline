@@ -1,4 +1,6 @@
 import * as CSS from '../lib/utils/CSS';
+import CreateTool from './tool/CreateTool';
+import TimeLineTool from './tool/TimeLineTool';
 
 function getTileFromOffset(offset) {
     return Math.floor(offset / config.tileSize);
@@ -30,37 +32,34 @@ function redraw(buttons) {
     });
 }
 
-export class Tool {
-    constructor (name) {
-        this.mousedown = this.mousemove = this.mouseup = function () {};
-        this.name = name;
-        this.active = false;
-    }
-}
-
 export default class TimeLineToolbox {
     constructor(timeLine, mouseListener) {
+        this.timeLine = timeLine;
         this.mouseListener = mouseListener;
         this.tools = {};
         this.attachedButtons = [];
 
         timeLine.wrapper.addEventListener('mousedown', ev => {
-            handleMouseEvent(createMouseEvent('mousedown', ev.line, ev.offsetX), this.tools);
+            handleMouseEvent(createMouseEvent('mouseDown', ev.line, ev.offsetX), this.tools);
         });
 
         timeLine.wrapper.addEventListener('mousemove', ev => {
             if (this.mouseListener.isDown && ev['line'] !== undefined) {
-                handleMouseEvent(createMouseEvent('mousemove', ev.line, ev.offsetX), this.tools);
+                handleMouseEvent(createMouseEvent('mouseMove', ev.line, ev.offsetX), this.tools);
             }
         });
 
         timeLine.wrapper.addEventListener('mouseup', ev => {
-            handleMouseEvent(createMouseEvent('mouseup', ev.line, ev.offsetX), this.tools);
+            handleMouseEvent(createMouseEvent('mouseUp', ev.line, ev.offsetX), this.tools);
         });
     }
 
+    initTools () {
+        let createTool = new CreateTool()
+    }
+
     createTool (name) {
-        this.tools[name] = new Tool(name);
+        this.tools[name] = new TimeLineTool(name);
         return this.tools[name];
     }
 
