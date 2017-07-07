@@ -1,7 +1,7 @@
-//import * as fermata from 'fermata';
+import fermata from 'fermata';
 
-let resourceServer = function () {};
-// let resourceServer = fermata.json(config.resourceServer);
+//let resourceServer = function () {};
+let resourceServer = fermata.json(config.resourceServer);
 
 export default class TimeLineDataManager {
     constructor  (resourceName, eventManager) {

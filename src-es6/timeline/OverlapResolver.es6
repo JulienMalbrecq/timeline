@@ -1,4 +1,4 @@
-import {INTERVAL} from '../lib/utils/Date';
+import INTERVAL from '../lib/utils/Date';
 import TimeSliceFactory from './data/TimeSlice';
 
 let flags = {
@@ -117,7 +117,7 @@ export default class OverlapResolver {
         if (OverlapResolver.isOverlapping(refSlice, newSlice)) {
             resolveEvent = refSlice.project === newSlice.project ? event.RESOLVED_MERGE : event.RESOLVED_OVERLAP;
             resolution = refSlice.project === newSlice.project ? resolveMerge(refSlice, newSlice) : resolveOverlap(refSlice, newSlice);
-            this.eventManager.fire(resolveEvent, resolution);
+            this.eventManager.fireEvent(resolveEvent, resolution);
         }
     }
 }

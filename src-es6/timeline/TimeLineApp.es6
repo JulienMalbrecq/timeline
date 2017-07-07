@@ -1,106 +1,101 @@
+import * as DateUtils from '../lib/utils/Date';
+import EventsManager from '../lib/EventsManager';
 import OverlapResolver from './OverlapResolver';
 import TimeLine from './TimeLine';
 import TimeLineRenderer from './TimeLineRenderer';
 import TimeLineToolbox from './TimeLineToolbox';
-import * as DateUtils from '../lib/utils/Date';
 import ProjectFactory from './data/Project';
-import TimeSliceFactory from "./data/TimeSlice";
+import TimeSliceFactory from './data/TimeSlice';
 import MouseStateListener from '../lib/MouseStateListener';
 
+class TimeLineApp {
+    constructor (wrapper, refDate) {
+        this.wrapper = wrapper;
+        this.refDate = refDate;
 
-    let App = function (wrapper, refDate) {
-    this.wrapper = wrapper;
-    this.refDate = refDate;
+        this.eventManager = new EventsManager({private: true});
 
-    this.eventManager = new EventsManager({private: true});
+        this.overlapResolver = new OverlapResolver(this.eventManager);
+        this.timeLine = new TimeLine(wrapper, refDate);
+        this.renderer = new TimeLineRenderer(wrapper, refDate);
 
-    this.overlapResolver = new OverlapResolver(this.eventManager);
-    this.timeLine = new TimeLine(wrapper, refDate);
-    this.renderer = new TimeLineRenderer(wrapper, refDate);
+        this.toolBox = new TimeLineToolbox(this.timeLine, new MouseStateListener(document.querySelector('html')));
 
-    this.toolBox = new TimeLineToolbox(timeLine);
+        // add a data manager which will manage the loading and rendering of the timelines
 
-    // add a data manager which will manage the loading and rendering of the timelines
-
-
-};
-
-
-var wrapper = document.getElementById('timeline'),
-    refDate = DateUtils.toMidnight(new Date()),
-    overlapResolver = new OverlapResolver(),
-    timeLine = new TimeLine(wrapper, refDate),
-    renderer = new TimeLineRenderer(wrapper, refDate),
-    toolBox = new TimeLineToolbox(timeLine, new MouseStateListener(document.querySelector('html'))),
-    itGroup = timeLine.addGroup('it'),
-    moveTool = toolBox.createTool('move'),
-    createTool = toolBox.createTool('create'),
-    createButtons = document.querySelectorAll('[data-tool=create]'),
-    moveButtons = document.querySelectorAll('[data-tool=move]'),
-    b, tmp,
-    playandgold = ProjectFactory.create('Play&Gold', '#FC0'),
-    antargaz = ProjectFactory.create('Antargaz', '#0F0'),
-    currentProject = playandgold,
-    timeSlices = [];
-
-itGroup.addLine('Julien');
-itGroup.addLine('Brieuc');
-
-createTool.mousedown = function (line, tile) {
-    if (line === undefined) {
-        return;
+        this.init();
     }
 
-    var date = timeLine.getDateFromTile(tile);
-    tmp = TimeSliceFactory.create(currentProject, line.user, date, date);
-    renderer.addSlice(tmp, line);
-};
+    // temp
+    init() {
+        let self = this,
+            itGroup = this.timeLine.addGroup('it'),
+            moveTool = this.toolBox.createTool('move'),
+            createTool = this.toolBox.createTool('create'),
+            createButtons = document.querySelectorAll('[data-tool=create]'),
+            moveButtons = document.querySelectorAll('[data-tool=move]'),
+            b, tmp,
+            playandgold = ProjectFactory.create('Play&Gold', '#FC0'),
+            antargaz = ProjectFactory.create('Antargaz', '#0F0'),
+            currentProject = playandgold,
+            timeSlices = [];
 
-createTool.mousemove = function (line, tile) {
-    var date = timeLine.getDateFromTile(tile);
-    if (date >= tmp.startDate) {
-        tmp.endDate = date;
-    }
+        itGroup.addLine('Julien');
+        itGroup.addLine('Brieuc');
 
-    renderer.refresh();
-};
+        createTool.mousedown = function (line, tile) {
+            if (line === undefined) {
+                return;
+            }
 
-createTool.mouseup = function (line, tile) {
-    var findOverlap = function (timeSlice) {
-            return timeSlice.user === tmp.user && overlapResolver.isOverlapping(timeSlice, tmp);
-        },
-        sameProjectFilter = function (timeSlice) {
-            return timeSlice.project === tmp.project;
-        },
-        overlapping = timeSlices.filter(findOverlap),
-        sameProjectOverlapping = overlapping.filter(sameProjectFilter);
+            var date = self.timeLine.getDateFromTile(tile);
+            tmp = TimeSliceFactory.create(currentProject, line.user, date, date);
+            self.renderer.addSlice(tmp, line);
+        };
 
-    if (overlapping.length > 0) {
-        if (overlapping.length === sameProjectOverlapping.length) {
-            overlapping.forEach(function (refSlice) {
-                if (tmp.project === refSlice.project) {
-                    overlapResolver.resolve(refSlice, tmp);
-                    tmp.startDate = refSlice.startDate;
-                    tmp.endDate = refSlice.endDate;
+        createTool.mousemove = function (line, tile) {
+            var date = self.timeLine.getDateFromTile(tile);
+            if (date >= tmp.startDate) {
+                tmp.endDate = date;
+            }
+
+            self.renderer.refresh();
+        };
+
+        createTool.mouseup = function (line, tile) {
+            var overlapping = timeSlices.filter(timeSlice => timeSlice.user === tmp.user && OverlapResolver.isOverlapping(timeSlice, tmp)),
+                sameProjectOverlapping = overlapping.filter(timeSlice => timeSlice.project === tmp.project);
+
+            if (overlapping.length > 0) {
+                if (overlapping.length === sameProjectOverlapping.length) {
+                    overlapping.forEach(refSlice => {
+                        if (tmp.project === refSlice.project) {
+                            self.overlapResolver.resolve(refSlice, tmp);
+                            tmp.startDate = refSlice.startDate;
+                            tmp.endDate = refSlice.endDate;
+                        }
+                    });
+
+                    self.renderer.refresh();
                 }
-            });
 
-            renderer.refresh();
+                self.renderer.removeSlice(tmp);
+                tmp = null;
+            } else {
+                timeSlices.push(tmp);
+                self.renderer.refresh();
+            }
+
+        };
+
+        for (b = 0; b < createButtons.length; b += 1) {
+            self.toolBox.attachButton(createTool, createButtons[b]);
         }
 
-        renderer.removeSlice(tmp);
-        tmp = null;
-    } else {
-        timeSlices.push(tmp);
-        renderer.refresh();
+        for (b = 0; b < moveButtons.length; b += 1) {
+            self.toolBox.attachButton(moveTool, moveButtons[b]);
+        }
     }
-
-};
-
-for (b = 0; b < createButtons.length; b += 1) {
-    toolBox.attachButton(createTool, createButtons[b]);
 }
 
-for (b = 0; b < moveButtons.length; b += 1) {
-    toolBox.attachButton(moveTool, moveButtons[b]);
-}
+let timeline = new TimeLineApp(document.getElementById('timeline'), DateUtils.toMidnight(new Date()));

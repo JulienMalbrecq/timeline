@@ -36,7 +36,7 @@ export default class TimeLineRenderer {
                     width: `${totalTiles * config.tileSize}px`,
                     left: `${startTile * config.tileSize}px`,
                     top: `${slice.line.wrapper.offsetTop}px`,
-                    backgroundColor: `${slice.timeSlice.project.color}px`
+                    backgroundColor: `${slice.timeSlice.project.color}`
                 };
 
             Object.assign(slice.element.style, style);

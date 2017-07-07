@@ -2,14 +2,22 @@
   "engines": {
     "node": ">= 0.10.0"
   },
+
   "scripts": {
-    "build": "babel src-es6 -d compiled/src-es6"
+    "build": "babel src-es6 -d compiled/src-es6",
+    "watch": "babel src-es6 --watch -d compiled/src-es6"
   },
+
+  "browserify-shim": {
+    "fermata": "global:fermata"
+  },
+
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-preset-env": "^1.6.0",
     "babel-preset-es2015": "^6.24.1",
     "babelify": "^7.3.0",
+    "browserify-shim": "^3.8.14",
     "fermata": "^0.11.0-beta1",
     "grunt": "~0.4.5",
     "grunt-babel": "^6.0.0",

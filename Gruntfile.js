@@ -15,7 +15,17 @@ module.exports = function(grunt) {
           'dist/app.js': ['compiled/**/*.js']
         },
         options: {
-            debug: false
+          debug: false,
+          transform: ['babelify', 'browserify-shim'],
+          shim: {
+            fermata: {
+              path: './node_modules/fermata/fermata.js',
+              exports: 'fermata'
+            }
+          },
+          external: [
+            './node_modules/fermata/fermata.js'
+          ]
         }
       }
     },
@@ -24,20 +34,31 @@ module.exports = function(grunt) {
         banner: '<%= banner %>',
         stripBanners: true
       },
-	  timeline: {
+
+      library: {
+        src: ['node_modules/fermata/fermata.js'],
+        dest: 'dist/lib.js'
+      },
+
+      timeline: {
         src: ['compiled/**/*.js'],
         dest: 'dist/app.js'
       }
     },
+
     uglify: {
       options: {
         banner: '<%= banner %>'
       },
+
       dist: {
-        src: ['dist/*.js', '!dist/*.min.js'],
-        dest: 'app.min.js'
+        files: {
+          'lib.min.js' : ['dist/lib.js'],
+          'app.min.js' : ['dist/app.js']
+        }
       }
     },
+
     jshint: {
       options: {
         curly: true,
@@ -66,9 +87,9 @@ module.exports = function(grunt) {
         files: '<%= jshint.gruntfile.src %>',
         tasks: ['jshint:gruntfile']
       },
-      lib_test: {
-        files: '<%= jshint.lib_test.src %>',
-        tasks: ['jshint:lib_test', 'qunit']
+      compiled: {
+        files: ['compiled/**/*.js'],
+        tasks: ['compile']
       }
     }
   });
@@ -83,7 +104,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   // Default task.
-  grunt.registerTask('default', ['browserify', 'uglify']);
-  grunt.registerTask('babel', ['babel']);
-
+  grunt.registerTask('default', ['compile', 'watch']);
+  grunt.registerTask('compile', ['browserify', 'concat:library', 'uglify']);
 };
