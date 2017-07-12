@@ -1,4 +1,4 @@
-import INTERVAL from '../lib/utils/Date.es6';
+import {INTERVAL} from '../lib/utils/Date.es6';
 import * as TimeSlice from './data/TimeSlice.es6';
 
 let flags = {

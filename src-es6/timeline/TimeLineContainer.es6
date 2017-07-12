@@ -40,8 +40,9 @@ export default class TimeLineContainer {
         this._services.tools = {
             create : new CreateTool(
                 this._services.timeLine,
+                this._services.timeSliceFactory,
                 this._services.dataManager.getDataManager('timeslice'),
-                this._services.timeSliceFactory
+                this._services.dataManager.getDataManager('project')
             )
         };
 

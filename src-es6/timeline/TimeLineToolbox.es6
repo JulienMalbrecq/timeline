@@ -15,21 +15,31 @@ export default class TimeLineToolbox {
             this._toolDependencies = {timeLine: this.timeLine, mouseListener: this.mouseListener};
 
             this.timeLine.wrapper.addEventListener('mousedown', ev => {
-                this.handleMouseEvent('mouseDown', ev.line, ev.offsetX);
+                if (ev.line !== undefined) {
+                    this.handleMouseEvent('mouseDown', ev.line, ev.offsetX);
+                }
             });
 
             this.timeLine.wrapper.addEventListener('mousemove', ev => {
-                if (this.mouseListener.isDown && ev['line'] !== undefined) {
+                if (this.mouseListener.isDown && ev.line !== undefined) {
                     this.handleMouseEvent('mouseMove', ev.line, ev.offsetX);
                 }
             });
 
             this.mouseListener.wrapper.addEventListener('mouseup', ev => {
-                this.handleMouseEvent('mouseUp', ev.line, ev.offsetX);
+                this.handleMouseEvent('mouseUp', ev.line || null, ev.offsetX);
             });
 
             this.tools.forEach(tool => Object.assign(tool, this._toolDependencies));
         }
+    }
+
+    initInterface() {
+        this.tools.forEach(tool => {
+            let buttons = document.querySelectorAll(`[data-tool="${tool.name}"]`);
+            [...buttons].forEach(button => this.attachButton(button, tool));
+            tool.initInterface();
+        });
     }
 
     addTool(timeLineTool) {

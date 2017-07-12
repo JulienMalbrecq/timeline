@@ -9,8 +9,7 @@ export default class TimeLineRenderer {
 
     addSlice (timeSlice) {
         let element = document.createElement('div');
-        element.appendChild(document.createTextNode('playandgold'));
-        // element.appendChild(document.createTextNode(timeSlice.project.name));
+        element.appendChild(document.createTextNode(timeSlice.project.name));
 
         element.setAttribute('class', 'time-slice');
         element.style.top = timeSlice.line.wrapper.offsetTop + 'px';
@@ -39,8 +38,7 @@ export default class TimeLineRenderer {
                     width: `${totalTiles * config.tileSize}px`,
                     left: `${startTile * config.tileSize}px`,
                     top: `${slice.line.wrapper.offsetTop}px`,
-                    backgroundColor: '#FFCC00'
-                    // backgroundColor: `${slice.timeSlice.project.color}`
+                    backgroundColor: `${slice.timeSlice.project.color}`
                 };
 
             Object.assign(slice.element.style, style);

@@ -29,13 +29,18 @@ class TimeLineApp {
     }
 
     init() {
+        // interface
+        this.toolBox.initInterface();
+
         // events
         this.eventManager.bind(TimeSlice.events.POST_CREATE, timeSlice => {
-            this.renderer.addSlice(timeSlice);
+            if (timeSlice) {
+                this.renderer.addSlice(timeSlice);
+            }
         });
 
         this.eventManager.bind(TimeSlice.events.CHANGED, timeSlice => {
-            if (timeSlice.changed) {
+            if (timeSlice && timeSlice.changed) {
                 this.renderer.refresh();
             }
         });
@@ -47,18 +52,16 @@ class TimeLineApp {
                     refSlice.line === newSlice.line
                     && this.overlapResolver.isOverlapping(refSlice, newSlice)
                 ),
-                sameProjectOverlapping = overlapping.filter(refSlice => refSlice.project === refSlice.project);
+                sameProjectOverlapping = overlapping.filter(refSlice => newSlice.project === refSlice.project);
 
             // check if there is overlap
             if (overlapping.length > 0) {
                 this.renderer.removeSlice(newSlice); // stop rendering newSlice
 
                 // check that all overlaps are of the same project
-                console.log(overlapping.length === sameProjectOverlapping.length, overlapping.length, sameProjectOverlapping.length);
                 if (overlapping.length === sameProjectOverlapping.length) {
                     overlapping.forEach(refSlice => {
                         resolveResponse = this.overlapResolver.resolve(refSlice, newSlice);
-                        console.log(resolveResponse);
                         if (resolveResponse !== null) {
                             // after a resolution, newSlice can be discarded
                             this.renderer.removeSlice(newSlice);
@@ -91,7 +94,7 @@ class TimeLineApp {
             itGroup = this.timeLine.addGroup('it'),
             createTool = this.toolBox.getToolByName('create'),
             createButtons = document.querySelectorAll('[data-tool=create]'),
-            b, tmp,
+            b,
             playandgold = ProjectFactory.create('Play&Gold', '#FC0'),
             antargaz = ProjectFactory.create('Antargaz', '#0F0'),
             currentProject = playandgold,
@@ -99,51 +102,6 @@ class TimeLineApp {
 
         itGroup.addLine('Julien');
         itGroup.addLine('Brieuc');
-
-        // createTool.mousedown = function (line, tile) {
-        //     if (line === undefined) {
-        //         return;
-        //     }
-        //
-        //     var date = self.timeLine.getDateFromTile(tile);
-        //     tmp = TimeSliceFactory.create(currentProject, line.user, date, date);
-        //     self.renderer.addSlice(tmp, line);
-        // };
-
-        // createTool.mousemove = function (line, tile) {
-        //     var date = self.timeLine.getDateFromTile(tile);
-        //     if (date >= tmp.startDate) {
-        //         tmp.endDate = date;
-        //     }
-        //
-        //     self.renderer.refresh();
-        // };
-
-        // createTool.mouseup = function (line, tile) {
-        //     var overlapping = timeSlices.filter(timeSlice => timeSlice.user === tmp.user && OverlapResolver.isOverlapping(timeSlice, tmp)),
-        //         sameProjectOverlapping = overlapping.filter(timeSlice => timeSlice.project === tmp.project);
-        //
-        //     if (overlapping.length > 0) {
-        //         if (overlapping.length === sameProjectOverlapping.length) {
-        //             overlapping.forEach(refSlice => {
-        //                 if (tmp.project === refSlice.project) {
-        //                     self.overlapResolver.resolve(refSlice, tmp);
-        //                     tmp.startDate = refSlice.startDate;
-        //                     tmp.endDate = refSlice.endDate;
-        //                 }
-        //             });
-        //
-        //             self.renderer.refresh();
-        //         }
-        //
-        //         self.renderer.removeSlice(tmp);
-        //         tmp = null;
-        //     } else {
-        //         timeSlices.push(tmp);
-        //         self.renderer.refresh();
-        //     }
-        //
-        // };
 
         for (b = 0; b < createButtons.length; b += 1) {
             self.toolBox.attachButton(createButtons[b], createTool);

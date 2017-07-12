@@ -3,7 +3,7 @@ export default class MouseStateListener {
         this._isDown = false;
         this.wrapper = wrapper;
         wrapper.addEventListener('mousedown', ev => this._isDown = true);
-        wrapper.addEventListener('mouseup', ev => {this._isDown = false; console.log(ev.srcElement)});
+        wrapper.addEventListener('mouseup', ev => this._isDown = false);
     }
 
     get isDown () { return this._isDown; }

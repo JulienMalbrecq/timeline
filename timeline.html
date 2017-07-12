@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <title>Timeline</title>
     <style>
-        html {
-            background: #F00;
-        }
-
         body {
             user-select: none;
         }
@@ -51,7 +47,10 @@
 </head>
 <body>
     <ul id="toolbar">
-        <li><a href="#" data-tool="create" class="toggle-button">Create</a></li>
+        <li>
+            <a href="#" data-tool="create" class="toggle-button">Create</a><br/>
+            <select data-tool-create="selector"></select>
+        </li>
         <li><a href="#" data-tool="move" class="toggle-button">Move</a></li>
     </ul>
 

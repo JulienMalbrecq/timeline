@@ -7,6 +7,8 @@ export default class TimeLineTool {
         this.mouseListener = mouseListener;
     }
 
+    initInterface() {}
+
     mouseDown (line, tile) {}
     mouseMove (line, tile) {}
     mouseUp   (line, tile) {}

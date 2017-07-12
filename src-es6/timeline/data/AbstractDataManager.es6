@@ -43,8 +43,10 @@ export default class AbstractDataManager {
     }
 
     remove (resource) {
-        // @todo
+        this.eventsManager.fireEvent(events.PRE_REMOVE, resource);
         console.log('removing', resource);
+        // @todo remove from server then throw following event
+        this.eventsManager.fireEvent(events.POST_REMOVE, resource);
     }
 
     parseData (data) {
