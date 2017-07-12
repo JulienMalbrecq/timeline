@@ -31,7 +31,7 @@ export default class MoveTool extends TimeLineTool {
 
     mouseUp(line, tile) {
         if (this.selectedSlice) {
-            let updated = this.timeSliceManager.persist(this.selectedSlice);
+            let updated = this.timeSliceManager.update(this.selectedSlice);
             if (false === updated) {
                 // cancel movement
                 this.computeNewPosition(this.origin.tile);
@@ -44,7 +44,14 @@ export default class MoveTool extends TimeLineTool {
 
     computeNewPosition (tile) {
         let tileMove = tile - this.origin.tile;
-        this.selectedSlice.startDate = getDateFromTile(this.origin.startTile + tileMove);
-        this.selectedSlice.endDate = getDateFromTile(this.origin.endTile + tileMove);
+
+        if (this.origin.tile === this.origin.startTile) {
+            this.selectedSlice.startDate = getDateFromTile(this.origin.startTile + tileMove);
+        } else if (this.origin.tile === this.origin.endTile) {
+            this.selectedSlice.endDate = getDateFromTile(this.origin.endTile + tileMove);
+        } else {
+            this.selectedSlice.startDate = getDateFromTile(this.origin.startTile + tileMove);
+            this.selectedSlice.endDate = getDateFromTile(this.origin.endTile + tileMove);
+        }
     }
 }

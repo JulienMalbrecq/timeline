@@ -1,5 +1,5 @@
 import {INTERVAL} from '../lib/utils/Date.es6';
-import * as TimeSlice from './data/TimeSlice.es6';
+import * as TimeSlice from './data/entity/TimeSlice.es6';
 
 let flags = {
         REF_START: 1,

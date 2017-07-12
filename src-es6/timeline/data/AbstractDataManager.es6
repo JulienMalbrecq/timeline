@@ -4,10 +4,11 @@ import fermata from "fermata";
 let resourceServer = fermata.json(config.resourceServer);
 
 export default class AbstractDataManager {
-    constructor  (resourceName, eventsManager) {
+    constructor  (resourceName, eventsManager, factory) {
         this.resourceName = resourceName;
         this.resourceServer = resourceServer[resourceName];
         this.eventsManager = eventsManager;
+        this.factory = factory;
     }
 
     findAll() {
@@ -30,10 +31,10 @@ export default class AbstractDataManager {
     }
 
     update (resource) {
-        let event = {resource, shouldUpdate: true};
+        let event = {resource, canceled: false};
         this.eventsManager.fireEvent(events.PRE_UPDATE, event);
 
-        if (event.shouldUpdate) {
+        if (false === event.canceled) {
             // @todo save to server, then fire following event
             console.log('updating', resource);
             this.eventsManager.fireEvent(events.POST_UPDATE, resource);
@@ -41,34 +42,39 @@ export default class AbstractDataManager {
             console.log('should not update', resource);
         }
 
-        return event.shouldUpdate;
+        return !event.canceled;
     }
 
     persist(resource) {
-        let event = {resource, shouldPersist: true};
+        if (resource.id) {
+            return this.update(resource);
+        }
+
+        let event = {resource, canceled: false};
         this.eventsManager.fireEvent(events.PRE_PERSIST, event);
 
-        if (event.shouldPersist) {
+        if (false === event.canceled) {
             resource.isTemp = false;
             // @todo save to server, then fire following event
             console.log('persisting', resource);
+            resource.id = 1;
             this.eventsManager.fireEvent(events.POST_PERSIST, resource);
 
-            return true;
         } else {
             console.log('should not persist', resource);
-            return false;
         }
+
+        return !event.canceled;
     }
 
     remove (resource) {
         this.eventsManager.fireEvent(events.PRE_REMOVE, resource);
         console.log('removing', resource);
-        // @todo remove from server then throw following event
+        // @todo remove from server then fire following event
         this.eventsManager.fireEvent(events.POST_REMOVE, resource);
     }
 
     parseData (data) {
-        return data;
+        throw `You should define a parseData method in class ${this.constructor.name}`;
     }
 }

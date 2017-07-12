@@ -4,13 +4,16 @@ import TimeLine from "./TimeLine.es6";
 import TimeLineRenderer from "./TimeLineRenderer.es6";
 import MouseStateListener from "../lib/MouseStateListener.es6";
 import TimeLineDataManager from "./data/TimeLineDataManager.es6";
-import ProjectDataManager from "./data/ProjectDataManager.es6";
-import TimeSliceDataManager from "./data/TimeSliceDataManager.es6";
-import {TimeSliceFactory} from "./data/TimeSlice.es6";
+import ProjectDataManager from "./data/dataManager/ProjectDataManager.es6";
+import TimeSliceDataManager from "./data/dataManager/TimeSliceDataManager.es6";
+import {TimeSliceFactory} from "./data/entity/TimeSlice.es6";
 import TimeLineToolbox from "./TimeLineToolbox.es6";
 import CreateTool from "./tool/CreateTool.es6";
 import MoveTool from "./tool/MoveTool.es6";
 import DeleteTool from "./tool/DeleteTool.es6";
+import ProjectFactory from "./data/entity/Project.es6";
+import UserFactory from "./data/entity/User.es6";
+import UserDataManager from "./data/dataManager/UserDataManager.es6";
 
 export default class TimeLineContainer {
     constructor(options) {
@@ -24,16 +27,27 @@ export default class TimeLineContainer {
         this._services.eventsManager = new EventsManager({private: true});
         this._services.mouseListener = new MouseStateListener(document.querySelector('html'));
 
+
         // data layer
+        //- factories
+        this._services.timeSliceFactory = new TimeSliceFactory(this._services.eventsManager);
+        this._services.projectFactory = new ProjectFactory(this._services.eventsManager);
+        this._services.userFactory = new UserFactory(this._services.eventsManager);
+
         this._services.dataManager = new TimeLineDataManager();
-        this._services.dataManager.addDataManager(new ProjectDataManager(this._services.eventsManager));
-        this._services.dataManager.addDataManager(new TimeSliceDataManager(this._services.eventsManager));
+
+        let managers = [
+            { manager: ProjectDataManager   , factory: this._services.projectFactory},
+            { manager: TimeSliceDataManager , factory: this._services.timeSliceFactory},
+            { manager: UserDataManager      , factory: this._services.userFactory}
+        ];
+
+        managers.forEach(entry => this._services.dataManager.addDataManager(new entry.manager(this._services.eventsManager, entry.factory)));
 
         // tiles
         this._services.overlapResolver = new OverlapResolver(this._services.eventsManager);
         this._services.timeLine = new TimeLine(this._options.wrapper, this._options.refDate, this._services.eventsManager);
         this._services.renderer = new TimeLineRenderer(this._options.wrapper, this._options.refDate);
-        this._services.timeSliceFactory = new TimeSliceFactory(this._services.eventsManager);
 
         // tools
         this._services.toolbox = new TimeLineToolbox(this._services.timeLine, this._services.mouseListener);

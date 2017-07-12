@@ -1,8 +1,9 @@
-import AbstractDataManager from './AbstractDataManager.es6';
-import ProjectFactory from './Project.es6';
+import AbstractDataManager from '../AbstractDataManager.es6';
 
 export default class ProjectDataManager extends AbstractDataManager {
-    constructor () { super('project'); }
+    constructor (entityManager, factory) {
+        super('project', entityManager, factory);
+    }
 
     findAll() {
         // @todo remove this method when backend is implemented
@@ -20,6 +21,6 @@ export default class ProjectDataManager extends AbstractDataManager {
             data = [data];
         }
 
-        return data.map(projectData => ProjectFactory.create(projectData.name, projectData.color));
+        return data.map(projectData => this.factory.create(projectData.name, projectData.color));
     }
 }

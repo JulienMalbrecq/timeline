@@ -1,8 +1,8 @@
-import AbstractDataManager from './AbstractDataManager.es6';
-import {factory} from './TimeSlice.es6';
+import AbstractDataManager from '../AbstractDataManager.es6';
+import {factory} from '../entity/TimeSlice.es6';
 
 export default class TimeSliceDataManager extends AbstractDataManager {
-    constructor (eventsManager) { super('timeslice', eventsManager); }
+    constructor (eventsManager, factory) { super('timeslice', eventsManager, factory); }
 
     parseData (data) {
         if (false === Array.isArray(data)) {

@@ -2,10 +2,12 @@ import * as DateUtils from '../lib/utils/Date.es6';
 
 import TimeLineContainer from './TimeLineContainer.es6';
 
-import * as TimeSlice from './data/TimeSlice.es6';
+import * as Data from './data/AbstractDataFactory.es6';
 import {events} from "./data/TimeLineDataManager.es6";
 import {resolutionType} from "./OverlapResolver.es6";
 import * as Timeline from './TimeLine.es6';
+
+import {TimeSlice} from './data/entity/TimeSlice.es6';
 
 class TimeLineApp {
     constructor (wrapper, refDate) {
@@ -43,14 +45,14 @@ class TimeLineApp {
         });
 
 
-        this.eventManager.bind(TimeSlice.events.POST_CREATE, timeSlice => {
+        this.eventManager.bind(Data.events.POST_CREATE, timeSlice => {
             if (timeSlice) {
                 this.timeLine.addSlice(timeSlice);
             }
         });
 
-        this.eventManager.bind(TimeSlice.events.CHANGED, timeSlice => {
-            if (timeSlice && timeSlice.changed) {
+        this.eventManager.bind(Data.events.CHANGED, timeSlice => {
+            if (timeSlice && timeSlice instanceof TimeSlice && timeSlice.changed) {
                 this.renderer.render(this.timeLine.slices);
             }
         });
@@ -61,7 +63,7 @@ class TimeLineApp {
             }
         });
 
-        this.eventManager.bind(events.PRE_PERSIST, event => {
+        this.eventManager.bind([events.PRE_PERSIST, events.PRE_UPDATE], event => {
             let newSlice = event.resource,
                 resolveResponse,
                 updated = [],
@@ -99,12 +101,12 @@ class TimeLineApp {
 
                             if (resolveResponse.type !== resolutionType.RESOLUTION_WITHIN) {
                                 newSlice = refSlice; // swap refSlice and newSlice and continue resolution
-                                event.shouldPersist = false;
+                                event.canceled = true;
                             }
                         }
                     });
                 } else {
-                    event.shouldPersist = false;
+                    event.canceled = true;
                 }
             }
 

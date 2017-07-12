@@ -1,5 +1,10 @@
-export class TimeSlice {
+import ManagedEntity from "../ManagedEntity.es6";
+import {AbstractDataFactory, events} from "../AbstractDataFactory.es6";
+
+export class TimeSlice extends ManagedEntity {
     constructor (project, line, startDate, endDate, isTemp = true, changed = true) {
+        super();
+
         this._project = project;
         this._line = line;
         this._startDate = startDate;
@@ -7,8 +12,6 @@ export class TimeSlice {
 
         this._isTemp = isTemp;
         this._changed = changed;
-
-        this._id = null;
 
         this.eventsManager = null;
     }
@@ -21,7 +24,6 @@ export class TimeSlice {
         return this._endDate - this._startDate;
     }
 
-    get id        () { return this._id; }
     get project   () { return this._project; }
     get line      () { return this._line; }
     get startDate () { return this._startDate; }
@@ -29,7 +31,6 @@ export class TimeSlice {
     get isTemp    () { return this._isTemp; }
     get changed   () { return this._changed; }
 
-    set id        (id) { this._id = id; }
     set project   (project) { this._project = project; this.changed = true; }
     set line      (line) { this._line = line; this.changed = true; }
     set startDate (startDate) { this._startDate = startDate; this.changed = true; }
@@ -45,33 +46,10 @@ export class TimeSlice {
     }
 }
 
-export class TimeSliceFactory {
-    constructor(eventsManager) {
-        this.eventsManager = eventsManager;
-    }
-
-    create(project, line, startDate, endDate, ...options) {
-        if (this.eventsManager) {
-            let preEvent = {project, line, startDate, endDate};
-            this.eventsManager.fireEvent(events.PRE_CREATE, preEvent);
-            var {project, line, startDate, endDate} = preEvent;
-        }
-
+export class TimeSliceFactory extends AbstractDataFactory {
+    createEntity(project, line, startDate, endDate, ...options) {
         let timeSlice = new TimeSlice(project, line, startDate, endDate, ...options);
         timeSlice.eventsManager = this.eventsManager;
-
-        if (this.eventsManager) {
-            let postEvent = timeSlice;
-            this.eventsManager.fireEvent(events.POST_CREATE, postEvent);
-            timeSlice = postEvent;
-        }
-
         return timeSlice;
     }
 }
-
-export let events = {
-    CHANGED: 'timeslice-changed',
-    PRE_CREATE: 'timeslice-pre-create-event',
-    POST_CREATE: 'timeslice-post-create-event',
-};

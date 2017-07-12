@@ -12,10 +12,6 @@ export default class TimeLineRenderer {
                 return;
             }
 
-            if (slice.element === undefined) {
-                this.initSlice(slice);
-            }
-
             let startTile = getTileFromDate(slice.startDate),
                 endTile = getTileFromDate(slice.endDate) + 1,
                 totalTiles = endTile - startTile,
