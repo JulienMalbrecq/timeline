@@ -2,13 +2,15 @@ import EventsManager from "../lib/EventsManager.es6";
 import OverlapResolver from "./OverlapResolver.es6";
 import TimeLine from "./TimeLine.es6";
 import TimeLineRenderer from "./TimeLineRenderer.es6";
-import TimeLineToolbox from "./TimeLineToolbox.es6";
 import MouseStateListener from "../lib/MouseStateListener.es6";
-import CreateTool from "./tool/CreateTool.es6";
 import TimeLineDataManager from "./data/TimeLineDataManager.es6";
 import ProjectDataManager from "./data/ProjectDataManager.es6";
 import TimeSliceDataManager from "./data/TimeSliceDataManager.es6";
 import {TimeSliceFactory} from "./data/TimeSlice.es6";
+import TimeLineToolbox from "./TimeLineToolbox.es6";
+import CreateTool from "./tool/CreateTool.es6";
+import MoveTool from "./tool/MoveTool.es6";
+import DeleteTool from "./tool/DeleteTool.es6";
 
 export default class TimeLineContainer {
     constructor(options) {
@@ -29,7 +31,7 @@ export default class TimeLineContainer {
 
         // tiles
         this._services.overlapResolver = new OverlapResolver(this._services.eventsManager);
-        this._services.timeLine = new TimeLine(this._options.wrapper, this._options.refDate);
+        this._services.timeLine = new TimeLine(this._options.wrapper, this._options.refDate, this._services.eventsManager);
         this._services.renderer = new TimeLineRenderer(this._options.wrapper, this._options.refDate);
         this._services.timeSliceFactory = new TimeSliceFactory(this._services.eventsManager);
 
@@ -43,6 +45,16 @@ export default class TimeLineContainer {
                 this._services.timeSliceFactory,
                 this._services.dataManager.getDataManager('timeslice'),
                 this._services.dataManager.getDataManager('project')
+            ),
+
+            delete : new DeleteTool(
+                this._services.timeLine,
+                this._services.dataManager.getDataManager('timeslice')
+            ),
+
+            move : new MoveTool(
+                this._services.timeLine,
+                this._services.dataManager.getDataManager('timeslice')
             )
         };
 

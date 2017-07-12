@@ -51,6 +51,7 @@
             <a href="#" data-tool="create" class="toggle-button">Create</a><br/>
             <select data-tool-create="selector"></select>
         </li>
+        <li><a href="#" data-tool="delete" class="toggle-button">Delete</a></li>
         <li><a href="#" data-tool="move" class="toggle-button">Move</a></li>
     </ul>
 
@@ -72,6 +73,7 @@
         };
 
         var config = {
+            startDate: new Date(),
             startHour: 8,
             tilesPerDay: 8,
             tileSize: 19

@@ -1,8 +1,4 @@
-import {INTERVAL} from '../lib/utils/Date.es6';
-
-function getDaysFromTile(tile) {
-    return Math.floor(tile / config.tilesPerDay);
-}
+import * as TileUtils from '../lib/utils/Tile.es6';
 
 function createTimeLineElement(line) {
     let element = document.createElement('div'),
@@ -21,14 +17,21 @@ class Line {
     constructor (startDate, user) {
         this.startDate = startDate;
         this.user = user;
-        this._currentProject = null;
     }
 }
 
+export const events = {
+    SLICE_ADDED: 'timeline-slice-added',
+    SLICE_REMOVED: 'timeline-slice-removed'
+};
+
 export default class TimeLine {
-    constructor (wrapper = null, startDate = null) {
+    constructor (wrapper, startDate, eventsManager) {
+        this.eventsManager = eventsManager;
         this.wrapper = wrapper;
         this.startDate = startDate;
+
+        this.slices = [];
     }
 
     addGroup (name) {
@@ -59,9 +62,23 @@ export default class TimeLine {
         this.wrapper.appendChild(element);
     }
 
-    getDateFromTile (tile) {
-        return new Date(this.startDate.getTime() + (INTERVAL.ONEDAY * getDaysFromTile(tile)) + (INTERVAL.ONEHOUR * (config.startHour + (tile % config.tilesPerDay))));
+    addSlice (slice) {
+        if (this.slices.find(refSlice => refSlice === slice) === undefined) {
+            this.eventsManager.fireEvent(events.SLICE_ADDED, slice);
+            this.slices.push(slice);
+        }
     }
 
-    get currentProject() { return this._currentProject; }
+    removeSlice (slice) {
+        let index = this.slices.findIndex(refSlice => refSlice === slice);
+        if (index >= 0) {
+            this.slices.splice(index, 1);
+            this.eventsManager.fireEvent(events.SLICE_REMOVED, slice);
+        }
+    }
+
+    getSlice (line, tile) {
+        let selectedDate = TileUtils.getDateFromTile(tile);
+        return this.slices.find(refSlice => refSlice.line === line && refSlice.containsDate(selectedDate));
+    }
 }

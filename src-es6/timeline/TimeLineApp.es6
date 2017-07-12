@@ -2,10 +2,10 @@ import * as DateUtils from '../lib/utils/Date.es6';
 
 import TimeLineContainer from './TimeLineContainer.es6';
 
-import ProjectFactory from './data/Project.es6';
 import * as TimeSlice from './data/TimeSlice.es6';
 import {events} from "./data/TimeLineDataManager.es6";
 import {resolutionType} from "./OverlapResolver.es6";
+import * as Timeline from './TimeLine.es6';
 
 class TimeLineApp {
     constructor (wrapper, refDate) {
@@ -13,7 +13,6 @@ class TimeLineApp {
 
         this.wrapper = wrapper;
         this.refDate = refDate;
-        this.slices = [];
 
         this.eventManager = this.container.get('eventsManager');
         this.overlapResolver = this.container.get('overlapResolver');
@@ -33,80 +32,97 @@ class TimeLineApp {
         this.toolBox.initInterface();
 
         // events
+        this.eventManager.bind(Timeline.events.SLICE_ADDED, slice => {
+            this.renderer.initSlice(slice);
+        });
+
+        this.eventManager.bind(Timeline.events.SLICE_REMOVED, slice => {
+            if (slice.element !== undefined) {
+                this.renderer.wrapper.removeChild(slice.element);
+            }
+        });
+
+
         this.eventManager.bind(TimeSlice.events.POST_CREATE, timeSlice => {
             if (timeSlice) {
-                this.renderer.addSlice(timeSlice);
+                this.timeLine.addSlice(timeSlice);
             }
         });
 
         this.eventManager.bind(TimeSlice.events.CHANGED, timeSlice => {
             if (timeSlice && timeSlice.changed) {
-                this.renderer.refresh();
+                this.renderer.render(this.timeLine.slices);
+            }
+        });
+
+        this.eventManager.bind(events.POST_REMOVE, timeSlice => {
+            if (timeSlice) {
+                this.timeLine.removeSlice(timeSlice);
             }
         });
 
         this.eventManager.bind(events.PRE_PERSIST, event => {
             let newSlice = event.resource,
                 resolveResponse,
-                overlapping = this.slices.filter(refSlice =>
-                    refSlice.line === newSlice.line
+                updated = [],
+                timeSliceManager = this.container.get('dataManager').getDataManager('timeslice'),
+                overlapping = this.timeLine.slices.filter(refSlice =>
+                    refSlice !== newSlice
+                    && refSlice.line === newSlice.line
                     && this.overlapResolver.isOverlapping(refSlice, newSlice)
                 ),
                 sameProjectOverlapping = overlapping.filter(refSlice => newSlice.project === refSlice.project);
 
             // check if there is overlap
             if (overlapping.length > 0) {
-                this.renderer.removeSlice(newSlice); // stop rendering newSlice
-
                 // check that all overlaps are of the same project
                 if (overlapping.length === sameProjectOverlapping.length) {
                     overlapping.forEach(refSlice => {
                         resolveResponse = this.overlapResolver.resolve(refSlice, newSlice);
                         if (resolveResponse !== null) {
                             // after a resolution, newSlice can be discarded
-                            this.renderer.removeSlice(newSlice);
+                            this.timeLine.removeSlice(newSlice);
+
+                            // update refSlice
+                            updated.push(refSlice);
 
                             if (false === newSlice.isTemp) {
+                                let index = updated.findIndex(updateSlice => updateSlice === newSlice);
+                                // remove from updated
+                                if (index >= 0) {
+                                    updated.splice(index, 1);
+                                }
+
                                 // remove from server
-                                console.log('should remove', newSlice);
-                                this.container.get('dataManager').getDataManager('timeslice').remove(newSlice);
+                                timeSliceManager.remove(newSlice);
                             }
 
                             if (resolveResponse.type !== resolutionType.RESOLUTION_WITHIN) {
-                                newSlice = refSlice;
+                                newSlice = refSlice; // swap refSlice and newSlice and continue resolution
                                 event.shouldPersist = false;
                             }
                         }
                     });
+                } else {
+                    event.shouldPersist = false;
                 }
-            } else {
-                // no overlap, commit the newSlice
-                this.slices.push(newSlice);
             }
 
-            this.renderer.refresh();
+            // commit to server all updated slices
+            updated.forEach(updatedSlice => timeSliceManager.update(updatedSlice));
+
+            this.renderer.render(this.timeLine.slices);
         });
     }
 
     // temp
     tempInit() {
-        let self = this,
-            itGroup = this.timeLine.addGroup('it'),
-            createTool = this.toolBox.getToolByName('create'),
-            createButtons = document.querySelectorAll('[data-tool=create]'),
-            b,
-            playandgold = ProjectFactory.create('Play&Gold', '#FC0'),
-            antargaz = ProjectFactory.create('Antargaz', '#0F0'),
-            currentProject = playandgold,
-            timeSlices = [];
+        let itGroup = this.timeLine.addGroup('it');
 
         itGroup.addLine('Julien');
         itGroup.addLine('Brieuc');
-
-        for (b = 0; b < createButtons.length; b += 1) {
-            self.toolBox.attachButton(createButtons[b], createTool);
-        }
     }
 }
 
-let timeline = new TimeLineApp(document.getElementById('timeline'), DateUtils.toMidnight(new Date()));
+config.startDate = DateUtils.toMidnight(config.startDate);
+let timeline = new TimeLineApp(document.getElementById('timeline'), config.startDate);

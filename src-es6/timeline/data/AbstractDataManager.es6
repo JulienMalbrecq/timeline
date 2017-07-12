@@ -29,6 +29,21 @@ export default class AbstractDataManager {
         });
     }
 
+    update (resource) {
+        let event = {resource, shouldUpdate: true};
+        this.eventsManager.fireEvent(events.PRE_UPDATE, event);
+
+        if (event.shouldUpdate) {
+            // @todo save to server, then fire following event
+            console.log('updating', resource);
+            this.eventsManager.fireEvent(events.POST_UPDATE, resource);
+        } else {
+            console.log('should not update', resource);
+        }
+
+        return event.shouldUpdate;
+    }
+
     persist(resource) {
         let event = {resource, shouldPersist: true};
         this.eventsManager.fireEvent(events.PRE_PERSIST, event);
@@ -36,9 +51,13 @@ export default class AbstractDataManager {
         if (event.shouldPersist) {
             resource.isTemp = false;
             // @todo save to server, then fire following event
+            console.log('persisting', resource);
             this.eventsManager.fireEvent(events.POST_PERSIST, resource);
+
+            return true;
         } else {
             console.log('should not persist', resource);
+            return false;
         }
     }
 

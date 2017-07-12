@@ -1,4 +1,5 @@
 import TimeLineTool from './TimeLineTool.es6';
+import * as TileUtils from "../../lib/utils/Tile.es6";
 
 export default class CreateTool extends TimeLineTool {
     constructor(timeLine, timeSliceFactory, timeSliceManager, projectManager) {
@@ -45,14 +46,13 @@ export default class CreateTool extends TimeLineTool {
 
     mouseDown(line, tile) {
         if (line !== null) {
-            console.log('here');
-            let date = this.timeLine.getDateFromTile(tile);
+            let date = TileUtils.getDateFromTile(tile);
             this.lastSlice = this.timeSliceFactory.create(this.currentProject, line, date, date);
         }
     }
 
     mouseMove(line, tile) {
-        let date = this.timeLine.getDateFromTile(tile);
+        let date = TileUtils.getDateFromTile(tile);
         if (this.lastSlice && date >= this.lastSlice.startDate) {
             this.lastSlice.endDate = date;
         }
@@ -60,9 +60,12 @@ export default class CreateTool extends TimeLineTool {
 
     mouseUp(line, tile) {
         if (line) {
-            this.timeSliceManager.persist(this.lastSlice);
+            if (false === this.timeSliceManager.persist(this.lastSlice)) {
+                this.timeLine.removeSlice(this.lastSlice);
+            }
         }
 
         this.lastSlice = null;
+        console.log(this.timeLine.slices);
     }
 }

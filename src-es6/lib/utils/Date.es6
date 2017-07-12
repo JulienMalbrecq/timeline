@@ -20,8 +20,3 @@ export let setHour = function(date, hour, minutes = 0, seconds = 0, milliseconds
 export let toMidnight = function (date) {
     return setHour(date, 0);
 };
-
-export let tileFromDate = function (date, refDate, startHour, tilePerDay) {
-    let startOfDay = setHour(new Date(date), startHour);
-    return dateDiff(date, refDate, INTERVAL.ONEDAY) * tilePerDay + dateDiff(date, startOfDay, INTERVAL.ONEHOUR);
-};

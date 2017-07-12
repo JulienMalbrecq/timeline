@@ -80,6 +80,12 @@ export default class EventsManager {
     }
 
     bind (eventName, callback) {
+        if (Array.isArray(eventName)) {
+            let callbacks = {};
+            eventName.forEach(name => callbacks[name] = this.bind(name, callback));
+            return callbacks;
+        }
+
         //- check if 'eventName' is already defined
         if (false === this.hasEvent(eventName)) {
             this.events[eventName] = new CustomEvent(eventName);

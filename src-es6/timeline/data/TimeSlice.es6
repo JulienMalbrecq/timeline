@@ -8,9 +8,20 @@ export class TimeSlice {
         this._isTemp = isTemp;
         this._changed = changed;
 
+        this._id = null;
+
         this.eventsManager = null;
     }
 
+    containsDate (date) {
+        return this._startDate <= date && this._endDate >= date;
+    }
+
+    get duration () {
+        return this._endDate - this._startDate;
+    }
+
+    get id        () { return this._id; }
     get project   () { return this._project; }
     get line      () { return this._line; }
     get startDate () { return this._startDate; }
@@ -18,6 +29,7 @@ export class TimeSlice {
     get isTemp    () { return this._isTemp; }
     get changed   () { return this._changed; }
 
+    set id        (id) { this._id = id; }
     set project   (project) { this._project = project; this.changed = true; }
     set line      (line) { this._line = line; this.changed = true; }
     set startDate (startDate) { this._startDate = startDate; this.changed = true; }
