@@ -1,7 +1,8 @@
-import TimeLineDataManager from './TimeLineDataManager';
-import ProjectFactory from './Project';
+import AbstractDataManager from './AbstractDataManager.es6';
+import ProjectFactory from './Project.es6';
 
-export default class ProjectDataManager extends TimeLineDataManager {
+export default class ProjectDataManager extends AbstractDataManager {
+    constructor () { super('project'); }
     parseData (data) {
         if (false === Array.isArray(data)) {
             data = [data];

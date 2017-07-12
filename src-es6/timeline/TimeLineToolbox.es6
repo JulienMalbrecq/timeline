@@ -1,81 +1,71 @@
-import * as CSS from '../lib/utils/CSS';
-import CreateTool from './tool/CreateTool';
-import TimeLineTool from './tool/TimeLineTool';
-
-function getTileFromOffset(offset) {
-    return Math.floor(offset / config.tileSize);
-}
-
-function createMouseEvent(event, line, offset) {
-    return {
-        event,
-        line,
-        tile: getTileFromOffset(offset)
-    };
-}
-
-function handleMouseEvent(mouseEvent, tools) {
-    let activeTool = getActiveTool(tools);
-    if (activeTool && activeTool[mouseEvent.event]) {
-        activeTool[mouseEvent.event](mouseEvent.line, mouseEvent.tile);
-    }
-}
-
-function getActiveTool(tools) {
-    return Object.values(tools).find(tool => tool.active);
-}
-
-function redraw(buttons) {
-    buttons.forEach(button => {
-        let action = button.tool.active ? 'addClass' : 'removeClass';
-        CSS[action](button.button, 'active');
-    });
-}
+import * as CSS from '../lib/utils/CSS.es6';
+import * as TileUtils from '../lib/utils/Tile.es6';
 
 export default class TimeLineToolbox {
-    constructor(timeLine, mouseListener) {
+    constructor(timeLine = null, mouseListener = null) {
         this.timeLine = timeLine;
         this.mouseListener = mouseListener;
-        this.tools = {};
+        this.tools = [];
         this.attachedButtons = [];
-
-        timeLine.wrapper.addEventListener('mousedown', ev => {
-            handleMouseEvent(createMouseEvent('mouseDown', ev.line, ev.offsetX), this.tools);
-        });
-
-        timeLine.wrapper.addEventListener('mousemove', ev => {
-            if (this.mouseListener.isDown && ev['line'] !== undefined) {
-                handleMouseEvent(createMouseEvent('mouseMove', ev.line, ev.offsetX), this.tools);
-            }
-        });
-
-        timeLine.wrapper.addEventListener('mouseup', ev => {
-            handleMouseEvent(createMouseEvent('mouseUp', ev.line, ev.offsetX), this.tools);
-        });
+        this.initListeners();
     }
 
-    initTools () {
-        let createTool = new CreateTool()
+    initListeners() {
+        if (this.timeLine && this.mouseListener) {
+            this._toolDependencies = {timeLine: this.timeLine, mouseListener: this.mouseListener};
+
+            this.timeLine.wrapper.addEventListener('mousedown', ev => {
+                this.handleMouseEvent('mouseDown', ev.line, ev.offsetX);
+            });
+
+            this.timeLine.wrapper.addEventListener('mousemove', ev => {
+                if (this.mouseListener.isDown && ev['line'] !== undefined) {
+                    this.handleMouseEvent('mouseMove', ev.line, ev.offsetX);
+                }
+            });
+
+            this.mouseListener.wrapper.addEventListener('mouseup', ev => {
+                this.handleMouseEvent('mouseUp', ev.line, ev.offsetX);
+            });
+
+            this.tools.forEach(tool => Object.assign(tool, this._toolDependencies));
+        }
     }
 
-    createTool (name) {
-        this.tools[name] = new TimeLineTool(name);
-        return this.tools[name];
+    addTool(timeLineTool) {
+        Object.assign(timeLineTool, this._toolDependencies);
+        this.tools.push(timeLineTool);
     }
 
-    attachButton (tool, button) {
+    getToolByName (name) {
+        return this.tools.find(tool => tool.name === name);
+    }
+
+    attachButton (button, tool) {
         button.addEventListener('click', ev => {
-            // disable all tools
-            Object.values(this.tools).forEach(tool =>  tool.active = false );
-            if (this.tools[tool.name] !== undefined) {
-                this.tools[tool.name].active = true;
-            }
-
-            // redraw
-            redraw(this.attachedButtons);
             ev.preventDefault();
+
+            // disable all but this tool
+            this.tools.forEach(iTool => iTool.active = iTool === tool );
+            this.redraw();
         });
 
         this.attachedButtons.push({button, tool});
+    }
+
+    handleMouseEvent (eventName, line, offset) {
+        let tile = TileUtils.getTileFromOffset(offset),
+            activeTool = this.tools.find(tool => tool.active);
+
+        if (activeTool && activeTool[eventName]) {
+            activeTool[eventName](line, tile);
+        }
+    }
+
+    redraw () {
+        this.attachedButtons.forEach(button => {
+            let action = button.tool.active ? 'addClass' : 'removeClass';
+            CSS[action](button.button, 'active');
+        });
     }
 }

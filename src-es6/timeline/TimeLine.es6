@@ -1,4 +1,4 @@
-import {INTERVAL} from '../lib/utils/Date';
+import {INTERVAL} from '../lib/utils/Date.es6';
 
 function getDaysFromTile(tile) {
     return Math.floor(tile / config.tilesPerDay);
@@ -26,7 +26,7 @@ class Line {
 }
 
 export default class TimeLine {
-    constructor (wrapper, startDate) {
+    constructor (wrapper = null, startDate = null) {
         this.wrapper = wrapper;
         this.startDate = startDate;
     }

@@ -1,34 +1,18 @@
-import fermata from 'fermata';
-
-//let resourceServer = function () {};
-let resourceServer = fermata.json(config.resourceServer);
-
 export default class TimeLineDataManager {
-    constructor  (resourceName, eventManager) {
-        this.eventManager = eventManager;
-        this.resourceServer = resourceServer[resourceName];
+    constructor () {
+        this.dataManagers = [];
     }
 
-    findAll() {
-        return this.findBy();
+    addDataManager (dataManager) {
+        this.dataManagers.push(dataManager);
     }
 
-    find (id) {
-        return this.findBy({id});
-    }
-
-    findBy (options = {}) {
-        return new Promise((resolve, refuse) => {
-            this.resourceServer(options).get((error, data) => {
-                if (error) {
-                    refuse(error);
-                } else {
-                    resolve(this.parseData(data))
-                }});
-        });
-    }
-
-    parseData (data) {
-        return data;
+    getDataManager(resourceName) {
+        return this.dataManagers.find(manager => manager.resourceName === resourceName);
     }
 }
+
+export let events = {
+    PRE_PERSIST : "data-manager-pre-persist",
+    POST_PERSIST : "data-manager-post-persist"
+};

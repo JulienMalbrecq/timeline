@@ -1,5 +1,5 @@
-import INTERVAL from '../lib/utils/Date';
-import TimeSliceFactory from './data/TimeSlice';
+import INTERVAL from '../lib/utils/Date.es6';
+import * as TimeSlice from './data/TimeSlice.es6';
 
 let flags = {
         REF_START: 1,
@@ -93,7 +93,7 @@ function resolveOverlap(refSlice, newSlice) {
         refSlice.endDate.setTime(newSlice.startDate.getTime() - INTERVAL.ONEHOUR);
         resolution.push(resolutionType.RESOLUTION_OVERLAP_END);
     } else {
-        duplicate = TimeSliceFactory.create(refSlice.project, refSlice.startDate, refSlice.endDate);
+        duplicate = TimeSlice.factory.create(refSlice.project, refSlice.startDate, refSlice.endDate);
         duplicate.startDate.setTime(newSlice.endDate.getTime() + INTERVAL.ONEHOUR);
         refSlice.endDate.setTime(newSlice.startDate.getTime() - INTERVAL.ONEHOUR);
         resolution.push(resolutionType.RESOLUTION_SURROUND);
@@ -108,16 +108,20 @@ export default class OverlapResolver {
         this.eventManager = eventManager;
     }
 
-    static isOverlapping (refSlice, newSlice) {
+    isOverlapping (refSlice, newSlice) {
         return computeOverlapScore(refSlice, newSlice) > 0;
     }
 
     resolve (refSlice, newSlice) {
-        let resolveEvent, resolution;
-        if (OverlapResolver.isOverlapping(refSlice, newSlice)) {
+        let resolveEvent, resolution,
+            response = null;
+
+        if (this.isOverlapping(refSlice, newSlice)) {
             resolveEvent = refSlice.project === newSlice.project ? event.RESOLVED_MERGE : event.RESOLVED_OVERLAP;
             resolution = refSlice.project === newSlice.project ? resolveMerge(refSlice, newSlice) : resolveOverlap(refSlice, newSlice);
-            this.eventManager.fireEvent(resolveEvent, resolution);
+            response = {type: resolveEvent, resolution};
         }
+
+        return response;
     }
 }

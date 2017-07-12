@@ -1,37 +1,56 @@
 export class TimeSlice {
-    constructor (project, user, startDate, endDate, changed = true) {
+    constructor (project, line, startDate, endDate, isTemp = true, changed = true) {
         this._project = project;
-        this._user = user;
+        this._line = line;
         this._startDate = startDate;
         this._endDate = endDate;
 
-        this.changed = changed;
+        this._isTemp = isTemp;
+        this._changed = changed;
+
+        this.eventsManager = null;
     }
 
     get project   () { return this._project; }
-    get user      () { return this._user; }
+    get line      () { return this._line; }
     get startDate () { return this._startDate; }
     get endDate   () { return this._endDate; }
+    get isTemp    () { return this._isTemp; }
+    get changed   () { return this._changed; }
 
     set project   (project) { this._project = project; this.changed = true; }
-    set user      (user) { this._user = user; this.changed = true; }
+    set line      (line) { this._line = line; this.changed = true; }
     set startDate (startDate) { this._startDate = startDate; this.changed = true; }
-    set endDate   (endDate) { this._project = endDate; this.changed = true; }
+    set endDate   (endDate) { this._endDate = endDate; this.changed = true; }
+    set isTemp    (isTemp) { this._isTemp = isTemp; this.changed = true; }
+
+    set changed (changed) {
+        this._changed = changed;
+
+        if (this.eventsManager) {
+            this.eventsManager.fireEvent(events.CHANGED, this);
+        }
+    }
 }
 
-export default class TimeSliceFactory {
-    static create(project, user, startDate, endDate) {
-        if (TimeSliceFactory.eventsManager) {
-            let preEvent = {project, user, startDate, endDate};
-            TimeSliceFactory.eventsManager.fireEvent(events.PRE_CREATE, preEvent);
-            var {project, user, startDate, endDate} = preEvent;
+export class TimeSliceFactory {
+    constructor(eventsManager) {
+        this.eventsManager = eventsManager;
+    }
+
+    create(project, line, startDate, endDate, ...options) {
+        if (this.eventsManager) {
+            let preEvent = {project, line, startDate, endDate};
+            this.eventsManager.fireEvent(events.PRE_CREATE, preEvent);
+            var {project, line, startDate, endDate} = preEvent;
         }
 
-        let timeSlice = new TimeSlice(project, user, startDate, endDate);
+        let timeSlice = new TimeSlice(project, line, startDate, endDate, ...options);
+        timeSlice.eventsManager = this.eventsManager;
 
-        if (TimeSliceFactory.eventsManager) {
+        if (this.eventsManager) {
             let postEvent = timeSlice;
-            TimeSliceFactory.eventsManager.fireEvent(events.POST_CREATE, postEvent);
+            this.eventsManager.fireEvent(events.POST_CREATE, postEvent);
             timeSlice = postEvent;
         }
 
@@ -40,8 +59,7 @@ export default class TimeSliceFactory {
 }
 
 export let events = {
+    CHANGED: 'timeslice-changed',
     PRE_CREATE: 'timeslice-pre-create-event',
     POST_CREATE: 'timeslice-post-create-event',
 };
-
-TimeSliceFactory.eventsManager = null;

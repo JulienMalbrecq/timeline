@@ -1,16 +1,19 @@
-import TimeLineTool from './TimeLineTool';
-import TimeSliceFactory from '../data/TimeSlice';
+import TimeLineTool from './TimeLineTool.es6';
 
 export default class CreateTool extends TimeLineTool {
-    constructor() {
-        super('create');
+    constructor(timeLine, timeSliceManager, timeSliceFactory) {
+        super('create', timeLine);
         this.lastSlice = null;
+        this.currentProject = null;
+
+        this.timeSliceManager = timeSliceManager;
+        this.timeSliceFactory = timeSliceFactory;
     }
 
     mouseDown(line, tile) {
         if (line !== null) {
             let date = this.timeLine.getDateFromTile(tile);
-            this.lastSlice = TimeSliceFactory.create(null, line.user, date, date);
+            this.lastSlice = this.timeSliceFactory.create(this.currentProject, line, date, date);
         }
     };
 
@@ -22,6 +25,7 @@ export default class CreateTool extends TimeLineTool {
     }
 
     mouseUp(line, tile) {
+        this.timeSliceManager.persist(this.lastSlice);
         this.lastSlice = null;
     }
 }

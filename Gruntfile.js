@@ -8,14 +8,19 @@ module.exports = function(grunt) {
       version: '0.1.0'
     },
     banner: '<%= grunt.template.today("yyyy-mm-dd") %>\n',
+
     // Task configuration.
     browserify: {
       dist: {
         files: {
-          'dist/app.js': ['compiled/**/*.js']
+          'dist/app.js': ['src-es6/**/*.es6']
         },
         options: {
-          debug: false,
+          browserifyOptions: {
+            paths: ['./node_modules','./src-es6'],
+            basedir: './src-es6'
+          },
+
           transform: ['babelify', 'browserify-shim'],
           shim: {
             fermata: {
@@ -29,6 +34,7 @@ module.exports = function(grunt) {
         }
       }
     },
+
     concat: {
       options: {
         banner: '<%= banner %>',
@@ -38,17 +44,14 @@ module.exports = function(grunt) {
       library: {
         src: ['node_modules/fermata/fermata.js'],
         dest: 'dist/lib.js'
-      },
-
-      timeline: {
-        src: ['compiled/**/*.js'],
-        dest: 'dist/app.js'
       }
     },
 
     uglify: {
       options: {
-        banner: '<%= banner %>'
+        banner: '// <%= banner %>',
+        sourceMap: true,
+        sourceMapIn: 'dist/app.js.map'
       },
 
       dist: {
@@ -59,36 +62,9 @@ module.exports = function(grunt) {
       }
     },
 
-    jshint: {
-      options: {
-        curly: true,
-        eqeqeq: true,
-        immed: true,
-        latedef: true,
-        newcap: true,
-        noarg: true,
-        sub: true,
-        undef: true,
-        unused: true,
-        boss: true,
-        eqnull: true,
-        browser: true,
-        globals: {}
-      },
-      gruntfile: {
-        src: 'Gruntfile.js'
-      },
-	  timeline: {
-		  src: 'compiled/**/*.js'
-	  }
-    },
     watch: {
-      gruntfile: {
-        files: '<%= jshint.gruntfile.src %>',
-        tasks: ['jshint:gruntfile']
-      },
       compiled: {
-        files: ['compiled/**/*.js'],
+        files: ['src-es6/**/*.es6'],
         tasks: ['compile']
       }
     }
