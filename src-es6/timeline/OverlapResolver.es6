@@ -112,6 +112,16 @@ export default class OverlapResolver {
         return computeOverlapScore(refSlice, newSlice) > 0;
     }
 
+    isAdjacent(refSlice, newSlice) {
+        // extends startDate + endDate of newSlice and test for overlap
+        let virtualNewSlice = {
+            startDate: new Date(newSlice.startDate.getTime() - INTERVAL.ONEHOUR),
+            endDate: new Date(newSlice.endDate.getTime() + INTERVAL.ONEHOUR)
+        };
+
+        return this.isOverlapping(refSlice, virtualNewSlice);
+    }
+
     resolve (refSlice, newSlice) {
         let resolveEvent, resolution,
             response = null;
@@ -120,6 +130,16 @@ export default class OverlapResolver {
             resolveEvent = refSlice.project === newSlice.project ? event.RESOLVED_MERGE : event.RESOLVED_OVERLAP;
             resolution = refSlice.project === newSlice.project ? resolveMerge(refSlice, newSlice) : resolveOverlap(refSlice, newSlice);
             response = {type: resolveEvent, resolution};
+        } else if (refSlice.project === newSlice.project && this.isAdjacent(refSlice, newSlice)) {
+            if (refSlice.startDate < newSlice.startDate) {
+                console.log('extending end');
+                newSlice.startDate = new Date(newSlice.startDate.getTime() - INTERVAL.ONEHOUR);
+            } else {
+                console.log('extending start');
+                newSlice.endDate = new Date(newSlice.endDate.getTime() + INTERVAL.ONEHOUR);
+            }
+
+            response = {type: event.RESOLVED_MERGE, resolution: resolveMerge(refSlice, newSlice)};
         }
 
         return response;

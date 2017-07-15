@@ -10,6 +10,31 @@
 
         #timeline {
             position: relative;
+            width: 100%;
+            overflow: scroll;
+        }
+
+        [data-widget="timeline-headers"] {
+            height: 1.3em;
+            overflow: hidden;
+        }
+
+        [data-widget="timeline-headers"] .day {
+            float: left;
+            height: 1.3em;
+            text-align: center;
+            box-sizing: border-box;
+            border: 1px solid;
+            border-left-style: none;
+        }
+
+        [data-widget="timeline-headers"] .today {
+            background: #0099ff;
+
+        }
+
+        [data-widget="timeline-headers"] .day:first-child {
+            border-left: solid 1px;
         }
 
         [data-timeline] {
@@ -58,6 +83,7 @@
     </ul>
 
     <div id="timeline">
+        <div data-widget="timeline-headers"></div>
 
     </div>
 
@@ -75,7 +101,7 @@
         };
 
         var config = {
-            startDate: new Date(),
+            startDate: new Date("2017-07-10"),
             startHour: 8,
             tilesPerDay: 8,
             tileSize: 19

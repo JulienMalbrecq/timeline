@@ -77,6 +77,10 @@ export default class TimeLine {
         }
     }
 
+    getLineSlices (line) {
+        return this.slices.filter(slice => slice.line === line);
+    }
+
     getSlice (line, tile) {
         let selectedDate = TileUtils.getDateFromTile(tile);
         return this.slices.find(refSlice => refSlice.line === line && refSlice.containsDate(selectedDate));
