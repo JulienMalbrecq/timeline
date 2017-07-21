@@ -43,15 +43,24 @@ export default class MoveTool extends TimeLineTool {
     }
 
     computeNewPosition (tile) {
-        let tileMove = tile - this.origin.tile;
+        let tileMove = tile - this.origin.tile,
+            newEnd,
+            newStart = this.origin.startTile + tileMove;
 
-        if (this.origin.tile === this.origin.startTile) {
-            this.selectedSlice.startDate = getDateFromTile(this.origin.startTile + tileMove);
-        } else if (this.origin.tile === this.origin.endTile) {
-            this.selectedSlice.endDate = getDateFromTile(this.origin.endTile + tileMove);
-        } else {
-            this.selectedSlice.startDate = getDateFromTile(this.origin.startTile + tileMove);
-            this.selectedSlice.endDate = getDateFromTile(this.origin.endTile + tileMove);
+        if (newStart >= 0) {
+            if (this.origin.tile === this.origin.startTile) {
+                if (newStart <= this.origin.endTile) {
+                    this.selectedSlice.startDate = getDateFromTile(newStart);
+                }
+            } else if (this.origin.tile === this.origin.endTile) {
+                newEnd = this.origin.endTile + tileMove;
+                if (newEnd >= this.origin.startTile) {
+                    this.selectedSlice.endDate = getDateFromTile(this.origin.endTile + tileMove);
+                }
+            } else {
+                this.selectedSlice.startDate = getDateFromTile(newStart);
+                this.selectedSlice.endDate = getDateFromTile(this.origin.endTile + tileMove);
+            }
         }
     }
 }

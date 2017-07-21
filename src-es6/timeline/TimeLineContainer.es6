@@ -14,11 +14,11 @@ import DeleteTool from "./tool/DeleteTool.es6";
 import ProjectFactory from "./data/entity/Project.es6";
 import UserFactory from "./data/entity/User.es6";
 import UserDataManager from "./data/dataManager/UserDataManager.es6";
+import {Config} from "../Config.es6";
 
 export default class TimeLineContainer {
-    constructor(options) {
+    constructor() {
         this._services = {};
-        this._options = options;
         this.init();
     }
 
@@ -46,8 +46,8 @@ export default class TimeLineContainer {
 
         // tiles
         this._services.overlapResolver = new OverlapResolver(this._services.eventsManager);
-        this._services.timeLine = new TimeLine(this._options.wrapper, this._options.refDate, this._services.eventsManager);
-        this._services.renderer = new TimeLineRenderer(this._options.wrapper, this._options.refDate);
+        this._services.timeLine = new TimeLine(Config.mainWrapper, Config.startDate, this._services.eventsManager);
+        this._services.renderer = new TimeLineRenderer(Config.mainWrapper, Config.startDate);
 
         // tools
         this._services.toolbox = new TimeLineToolbox(this._services.timeLine, this._services.mouseListener);

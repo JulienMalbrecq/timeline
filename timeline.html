@@ -11,16 +11,16 @@
         #timeline {
             position: relative;
             width: 100%;
-            overflow: scroll;
         }
 
         [data-widget="timeline-headers"] {
             height: 1.3em;
             overflow: hidden;
+            width: 200%;
         }
 
         [data-widget="timeline-headers"] .day {
-            float: left;
+            display: inline-block;
             height: 1.3em;
             text-align: center;
             box-sizing: border-box;
@@ -28,9 +28,12 @@
             border-left-style: none;
         }
 
-        [data-widget="timeline-headers"] .today {
-            background: #0099ff;
+        [data-widget="timeline-headers"] .weekend {
+            background: #DDD;
+        }
 
+        [data-widget="timeline-headers"] .today {
+            background: #09F;
         }
 
         [data-widget="timeline-headers"] .day:first-child {
@@ -39,7 +42,7 @@
 
         [data-timeline] {
             height: 19px;
-            width: 100%;
+            width:100%;
             background: url(img/grid.png);
             position: relative;
         }
@@ -64,11 +67,34 @@
             box-shadow: 0 3px 6px rgba(0,0,0,.2);
 
             text-align: center;
-            font-size: 10px;
+            font-size: 13px;
             font-family: Arial, Helvetica, sans-serif;
             overflow: hidden;
 
             transition: all 0.1s ease-in-out;
+        }
+
+        #timeline {
+            display: table;
+        }
+
+        .time {
+            display: table-cell;
+        }
+
+        .user-timeline {
+            display: table-row;
+        }
+
+        .user-timeline:last-child .time {
+            padding-bottom: 1px;
+        }
+
+        .user-timeline .label {
+            display: inline-block;
+            white-space: nowrap;
+            padding-right: 10px;
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -83,30 +109,13 @@
     </ul>
 
     <div id="timeline">
-        <div data-widget="timeline-headers"></div>
-
+        <div data-widget="timeline-headers" class="line-wrapper">
+            <div class="user-timeline">
+                <div class="label">test</div>
+                <div class="time"></div>
+            </div>
+        </div>
     </div>
-
-    <script>
-        var MainConfig = {
-            services: {
-                project: '',
-                tasks: ''
-            },
-            timeline: {
-                startHour: 8,
-                tilesPerDay: 8,
-                tileSize: 19
-            }
-        };
-
-        var config = {
-            startDate: new Date("2017-07-10"),
-            startHour: 8,
-            tilesPerDay: 8,
-            tileSize: 19
-        };
-    </script>
 
     <script src="lib.min.js"></script>
     <script src="app.min.js"></script>

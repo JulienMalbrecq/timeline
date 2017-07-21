@@ -1,7 +1,8 @@
 import {events} from "./TimeLineDataManager.es6";
 import fermata from "fermata";
+import {Config} from "../../Config.es6";
 
-let resourceServer = fermata.json(config.resourceServer);
+let resourceServer = fermata.json(Config.resourceServer);
 
 export default class AbstractDataManager {
     constructor  (resourceName, eventsManager, factory) {

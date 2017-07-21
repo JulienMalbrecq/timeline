@@ -1,5 +1,3 @@
-import * as DateUtils from '../lib/utils/Date.es6';
-
 import TimeLineContainer from './TimeLineContainer.es6';
 
 import * as Data from './data/AbstractDataFactory.es6';
@@ -9,13 +7,12 @@ import * as Timeline from './TimeLine.es6';
 
 import {TimeSlice} from './data/entity/TimeSlice.es6';
 import TimeLineHeaderWidget from "./widget/TimeLineHeaderWidget.es6";
+import UserLabelWidget from "./widget/UserLabelWidget.es6";
+import {Config} from "../Config.es6";
 
 class TimeLineApp {
-    constructor (wrapper, refDate) {
-        this.container = new TimeLineContainer({wrapper, refDate});
-
-        this.wrapper = wrapper;
-        this.refDate = refDate;
+    constructor () {
+        this.container = new TimeLineContainer();
 
         this.eventManager = this.container.get('eventsManager');
         this.overlapResolver = this.container.get('overlapResolver');
@@ -24,16 +21,16 @@ class TimeLineApp {
         this.renderer = this.container.get('renderer');
         this.toolBox = this.container.get('toolbox');
 
-        // add a data manager which will manage the loading and rendering of the timelines
-
         this.init();
         this.initInterface();
-        this.tempInit();
+        //this.tempInit();
     }
 
     initInterface() {
-        this.timeLineHeaderWidget = new TimeLineHeaderWidget(this.refDate, config.tileSize, config.tilesPerDay);
+        this.timeLineHeaderWidget = new TimeLineHeaderWidget(Config.startDate, Config.tileSize, Config.tilesPerDay);
         this.timeLineHeaderWidget.createInterface();
+
+        new UserLabelWidget(this.eventManager);
     }
 
     init() {
@@ -47,7 +44,7 @@ class TimeLineApp {
 
         this.eventManager.bind(Timeline.events.SLICE_REMOVED, slice => {
             if (slice.element !== undefined) {
-                this.renderer.wrapper.removeChild(slice.element);
+                slice.element = null;
             }
         });
 
@@ -74,6 +71,29 @@ class TimeLineApp {
             if (event.resource instanceof TimeSlice) {
                 this.handleNewTimeSliceEvent(event);
             }
+        });
+
+        // load all users and init the timeline
+        this.container.get('dataManager').getDataManager('user').findAll().then(users => this.initTimeLine(users));
+    }
+
+    initTimeLine (users) {
+        let groups = [];
+
+        // group by group
+        users.forEach(user => {
+            let userGroup = groups.find(group => group.name === user.group);
+            if (!userGroup) {
+                userGroup = {name: user.group, users: []};
+                groups.push(userGroup);
+            }
+
+            userGroup.users.push(user);
+        });
+
+        groups.forEach(group => {
+            let tlGroup = this.timeLine.addGroup(group.name);
+            group.users.forEach(user => tlGroup.addLine(user.name));
         });
     }
 
@@ -135,10 +155,9 @@ class TimeLineApp {
     tempInit() {
         let itGroup = this.timeLine.addGroup('it');
 
-        itGroup.addLine('Julien');
-        itGroup.addLine('Brieuc');
+        itGroup.addLine('Julien Malbrecq');
+        itGroup.addLine('Brieuc Barthelemy');
     }
 }
 
-config.startDate = DateUtils.toMidnight(config.startDate);
-let timeline = new TimeLineApp(document.getElementById('timeline'), config.startDate);
+let timeline = new TimeLineApp();

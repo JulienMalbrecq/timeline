@@ -1,16 +1,29 @@
 import * as TileUtils from '../lib/utils/Tile.es6';
+import * as CSS from "../lib/utils/CSS.es6";
 
 function createTimeLineElement(line) {
-    let element = document.createElement('div'),
+    let lineWrapper = document.createElement('div'),
+        labelElement = document.createElement('div'),
+        element = document.createElement('div'),
         registerLineInEvent = function (ev) {
             ev.line = line;
         };
 
+    CSS.addClass(labelElement, 'label');
+    labelElement.appendChild(document.createTextNode(line.user));
+
+    CSS.addClass(lineWrapper, 'user-timeline');
+    lineWrapper.appendChild(labelElement);
     element.addEventListener('mousedown', registerLineInEvent);
+
     element.addEventListener('mousemove', registerLineInEvent);
     element.addEventListener('mouseup', registerLineInEvent);
     element.setAttribute('data-timeline', line.user);
-    return element;
+    CSS.addClass(element, 'time');
+
+    lineWrapper.appendChild(element);
+
+    return lineWrapper;
 }
 
 class Line {
@@ -21,6 +34,7 @@ class Line {
 }
 
 export const events = {
+    LINE_ADDED: 'timeline-line-added',
     SLICE_ADDED: 'timeline-slice-added',
     SLICE_REMOVED: 'timeline-slice-removed'
 };
@@ -39,7 +53,7 @@ export default class TimeLine {
             wrapper = document.createElement('div'),
             lineWrapper = document.createElement('div'),
             titleElement = document.createElement('div'),
-            group = new TimeLine(lineWrapper, this.startDate);
+            group = new TimeLine(lineWrapper, this.startDate, this.eventsManager);
 
         wrapper.setAttribute('class', 'group-wrapper');
         lineWrapper.setAttribute('class', 'line-wrapper');
@@ -60,6 +74,8 @@ export default class TimeLine {
 
         line.wrapper = element;
         this.wrapper.appendChild(element);
+
+        this.eventsManager.fireEvent(events.LINE_ADDED, line);
     }
 
     addSlice (slice) {

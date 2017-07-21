@@ -2,8 +2,8 @@ import ManagedEntity from "../ManagedEntity.es6";
 import {AbstractDataFactory} from "../AbstractDataFactory.es6";
 
 class User extends ManagedEntity {
-    constructor(name, group) {
-        super();
+    constructor(id, name, group) {
+        super(id);
 
         this.name = name;
         this.group = group;
@@ -11,7 +11,7 @@ class User extends ManagedEntity {
 }
 
 export default class UserFactory extends AbstractDataFactory {
-    createEntity (name, group) {
-        return new User(name, group);
+    createEntity ({id, name, group}) {
+        return new User(id, name, group);
     }
 }

@@ -21,15 +21,13 @@ export default class TimeLineHeaderWidget {
     }
 
     createInterface() {
-        console.log('called');
         /** @var Node this.wrapper */
-        this.wrapper = document.querySelector('[data-widget="timeline-headers"]');
+        this.wrapper = document.querySelector('[data-widget="timeline-headers"] .time');
         if (!this.wrapper) {
-            console.log('not found');
             return;
         }
 
-        [...this.wrapper.childNodes].forEach(node => document.removeChild(node));
+        [...this.wrapper.childNodes].forEach(node => node.parentNode.removeChild(node));
 
         let tempWrapper = document.createDocumentFragment(),
             date = new Date(toMidnight(this.refDate)),
@@ -40,7 +38,7 @@ export default class TimeLineHeaderWidget {
             date = new Date(date.getTime() + INTERVAL.ONEDAY);
         }
 
-        this.wrapper.style.width = `${this.dayWidth * this._daysToShow}px`;
+        // this.wrapper.style.width = `${this.dayWidth * this._daysToShow}px`;
         this.wrapper.appendChild(tempWrapper);
     }
 
@@ -56,6 +54,12 @@ export default class TimeLineHeaderWidget {
         if (toMidnight(day).getTime() === toMidnight(new Date()).getTime()) {
             CSS.addClass(element, 'today');
         }
+
+        if (day.getDay() === 0 || day.getDay() === 6) {
+            CSS.addClass(element, "weekend");
+        }
+
+        console.log(day, day.getDay());
 
         return element;
     }

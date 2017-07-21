@@ -1,6 +1,6 @@
 export default class ManagedEntity {
-    constructor () {
-        this._id = null;
+    constructor (id = null) {
+        this._id = id;
     }
 
     get id () { return this._id; }
