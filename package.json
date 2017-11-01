@@ -2,16 +2,13 @@
   "engines": {
     "node": ">= 0.10.0"
   },
-
   "scripts": {
-    "build": "babel src-es6 -d compiled/src-es6",
-    "watch": "babel src-es6 --watch -d compiled/src-es6"
+    "build": "babel src -d compiled/src",
+    "watch": "babel src --watch -d compiled/src"
   },
-
   "browserify-shim": {
     "fermata": "global:fermata"
   },
-
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-preset-env": "^1.6.0",
@@ -28,5 +25,9 @@
     "grunt-contrib-requirejs": "^1.0.0",
     "grunt-contrib-uglify": "^0.5.1",
     "grunt-contrib-watch": "^0.6.1"
+  },
+  "dependencies": {
+    "findup-sync": "^2.0.0",
+    "grunt-cli": "^1.2.0"
   }
 }

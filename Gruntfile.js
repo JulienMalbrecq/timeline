@@ -13,12 +13,12 @@ module.exports = function(grunt) {
     browserify: {
       dist: {
         files: {
-          'dist/app.js': ['src-es6/**/*.es6']
+          'dist/app.js': ['src/**/*.es6']
         },
         options: {
           browserifyOptions: {
-            paths: ['./node_modules','./src-es6'],
-            basedir: './src-es6'
+            paths: ['./node_modules','./src'],
+            basedir: './src'
           },
 
           transform: ['babelify', 'browserify-shim'],
@@ -64,7 +64,7 @@ module.exports = function(grunt) {
 
     watch: {
       compiled: {
-        files: ['src-es6/**/*.es6'],
+        files: ['src/**/*.es6'],
         tasks: ['compile']
       }
     }
