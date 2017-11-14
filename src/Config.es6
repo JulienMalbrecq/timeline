@@ -5,7 +5,8 @@ let defaultConfig = {
     refDate: new Date(),
     startHour: 8,
     tilesPerDay: 8,
-    tileSize: 19
+    tileSize: 19,
+    resourceServer: 'to-be-defined'
 };
 
 class ConfigValues {
