@@ -1,5 +1,7 @@
 import ManagedEntity from "../ManagedEntity.es6";
 import {AbstractDataFactory, events} from "../AbstractDataFactory.es6";
+import {Project} from "./Project.es6";
+import {Line} from "../../TimeLine.es6";
 
 export class TimeSlice extends ManagedEntity {
     constructor (project, line, startDate, endDate, isTemp = true, changed = true) {
@@ -60,7 +62,25 @@ export class TimeSlice extends ManagedEntity {
 }
 
 export class TimeSliceFactory extends AbstractDataFactory {
+    constructor(entityBank, eventsManager) {
+        super(eventsManager);
+        this.entityBank = entityBank;
+    }
+
     createEntity(project, line, startDate, endDate, ...options) {
+        if (false === project instanceof Project) {
+            project = this.entityBank.getFromBank('projects', project);
+        }
+
+        if (false === line instanceof Line) {
+            console.log(line);
+            line = this.entityBank.getFromBank('users', line).timeLine;
+        }
+
+        // transform dates
+        startDate = new Date(startDate);
+        endDate = new Date(endDate);
+
         let timeSlice = new TimeSlice(project, line, startDate, endDate, ...options);
         timeSlice.eventsManager = this.eventsManager;
         return timeSlice;

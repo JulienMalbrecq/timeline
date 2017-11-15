@@ -9,6 +9,13 @@ export default class TimeSliceDataManager extends AbstractDataManager {
             data = [data];
         }
 
-        return data.map(data => factory.create(data.project, null /* @todo replace by timeline line */, data.startDate, data.endDate, false, false));
+        return data.map(data => factory.create(
+            data.project,
+            null /* @todo replace by timeline line */,
+            data.startDate,
+            data.endDate,
+            false,
+            false
+        ));
     }
 }

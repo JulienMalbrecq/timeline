@@ -2,12 +2,12 @@ import TimeLineTool from './TimeLineTool.es6';
 import * as TileUtils from "../../lib/utils/Tile.es6";
 
 export default class CreateTool extends TimeLineTool {
-    constructor(timeLine, timeSliceFactory, timeSliceManager, projectManager) {
+    constructor(timeLine, timeSliceFactory, entityBank, timeSliceManager) {
         super('create', timeLine);
 
         this.timeSliceManager = timeSliceManager;
-        this.projectManager = projectManager;
         this.timeSliceFactory = timeSliceFactory;
+        this.entityBank = entityBank;
 
         this.lastSlice = null;
         this._currentProject = null;
@@ -19,33 +19,33 @@ export default class CreateTool extends TimeLineTool {
     set currentProject (name) { this._currentProject = this.projectList.find(project => project.name === name); }
 
     initInterface() {
-        this.projectManager.findAll().then(projects => {
-            let selectors = document.querySelectorAll('[data-tool-create="selector"]'),
-                optionWrapper = document.createDocumentFragment();
+        let selectors = document.querySelectorAll('[data-tool-create="selector"]'),
+            optionWrapper = document.createDocumentFragment();
 
-            this.projectList = projects;
-            if (this.projectList.length > 0) {
-                this.currentProject = this.projectList[0].name;
-            }
+        this.projectList = this.entityBank.getBank('projects');
 
-            projects.forEach(project => {
-                let option = document.createElement('option'),
-                    label = document.createTextNode(project.name);
+        if (this.projectList.length > 0) {
+            this.currentProject = this.projectList[0].name;
+        }
 
-                option.appendChild(label);
-                option.setAttribute('value', project.name);
-                optionWrapper.appendChild(option);
-            });
+        this.projectList.forEach(project => {
+            let option = document.createElement('option'),
+                label = document.createTextNode(project.name);
 
-            [...selectors].forEach(selector => {
-                selector.appendChild(optionWrapper); // @todo find a way to duplicate optionWrapper
-                selector.addEventListener('change', ev => this.currentProject = ev.target.value);
-            });
+            option.appendChild(label);
+            option.setAttribute('value', project.name);
+            optionWrapper.appendChild(option);
+        });
+
+        [...selectors].forEach(selector => {
+            selector.appendChild(optionWrapper); // @todo find a way to duplicate optionWrapper
+            selector.addEventListener('change', ev => this.currentProject = ev.target.value);
         });
     }
 
     mouseDown(line, tile) {
         if (line !== null) {
+            console.log(line);
             let date = TileUtils.getDateFromTile(tile);
             this.lastSlice = this.timeSliceFactory.create(this.currentProject, line, date, date);
         }
@@ -66,6 +66,5 @@ export default class CreateTool extends TimeLineTool {
         }
 
         this.lastSlice = null;
-        console.log(this.timeLine.slices);
     }
 }

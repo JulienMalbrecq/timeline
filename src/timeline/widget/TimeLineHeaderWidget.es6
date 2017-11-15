@@ -59,8 +59,6 @@ export default class TimeLineHeaderWidget {
             CSS.addClass(element, "weekend");
         }
 
-        console.log(day, day.getDay());
-
         return element;
     }
 }

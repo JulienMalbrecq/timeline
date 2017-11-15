@@ -15,6 +15,7 @@ import ProjectFactory from "./data/entity/Project.es6";
 import UserFactory from "./data/entity/User.es6";
 import UserDataManager from "./data/dataManager/UserDataManager.es6";
 import {Config} from "../Config.es6";
+import TimeLineEntityBank from "./TimeLineEntityBank.es6";
 
 export default class TimeLineContainer {
     constructor() {
@@ -25,12 +26,12 @@ export default class TimeLineContainer {
     init() {
         // utils
         this._services.eventsManager = new EventsManager({private: true});
+        this._services.entityBank = new TimeLineEntityBank();
         this._services.mouseListener = new MouseStateListener(document.querySelector('html'));
-
 
         // data layer
         //- factories
-        this._services.timeSliceFactory = new TimeSliceFactory(this._services.eventsManager);
+        this._services.timeSliceFactory = new TimeSliceFactory(this._services.entityBank, this._services.eventsManager);
         this._services.projectFactory = new ProjectFactory(this._services.eventsManager);
         this._services.userFactory = new UserFactory(this._services.eventsManager);
 
@@ -57,8 +58,8 @@ export default class TimeLineContainer {
             create : new CreateTool(
                 this._services.timeLine,
                 this._services.timeSliceFactory,
-                this._services.dataManager.getDataManager('timeslice'),
-                this._services.dataManager.getDataManager('project')
+                this._services.entityBank,
+                this._services.dataManager.getDataManager('timeslice')
             ),
 
             delete : new DeleteTool(

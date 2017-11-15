@@ -1,7 +1,7 @@
 import ManagedEntity from "../ManagedEntity.es6";
 import {AbstractDataFactory} from "../AbstractDataFactory.es6";
 
-class Project extends ManagedEntity {
+export class Project extends ManagedEntity {
     constructor (name, color) {
         super();
 

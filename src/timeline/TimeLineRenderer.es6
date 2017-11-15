@@ -1,4 +1,5 @@
 import {getTileFromDate} from '../lib/utils/Tile.es6';
+import * as ColorUtils from '../lib/utils/Color.es6';
 import {Config} from "../Config.es6";
 
 export default class TimeLineRenderer {
@@ -34,9 +35,17 @@ export default class TimeLineRenderer {
     }
 
     initSlice (slice) {
-        let element = document.createElement('div');
+        let element = document.createElement('div'),
+            classNames = ['time-slice'];
+
+        if (ColorUtils.isDark(slice.project.color, 130)) {
+            classNames.push('dark-background');
+        }
+
         element.appendChild(document.createTextNode(slice.project.name));
-        element.setAttribute('class', 'time-slice');
+        element.setAttribute('class', classNames.join(' '));
+        element.setAttribute('title', slice.project.name);
+
         slice.element = element;
     }
 }

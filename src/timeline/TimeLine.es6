@@ -10,7 +10,7 @@ function createTimeLineElement(line) {
         };
 
     CSS.addClass(labelElement, 'label');
-    labelElement.appendChild(document.createTextNode(line.user));
+    labelElement.appendChild(document.createTextNode(line.user.name));
 
     CSS.addClass(lineWrapper, 'user-timeline');
     lineWrapper.appendChild(labelElement);
@@ -18,7 +18,7 @@ function createTimeLineElement(line) {
 
     element.addEventListener('mousemove', registerLineInEvent);
     element.addEventListener('mouseup', registerLineInEvent);
-    element.setAttribute('data-timeline', line.user);
+    element.setAttribute('data-timeline', line.user.name);
     CSS.addClass(element, 'time');
 
     lineWrapper.appendChild(element);
@@ -26,7 +26,7 @@ function createTimeLineElement(line) {
     return lineWrapper;
 }
 
-class Line {
+export class Line {
     constructor (startDate, user) {
         this.startDate = startDate;
         this.user = user;
@@ -56,6 +56,7 @@ export default class TimeLine {
             group = new TimeLine(lineWrapper, this.startDate, this.eventsManager);
 
         wrapper.setAttribute('class', 'group-wrapper');
+        titleElement.setAttribute('class', 'group-wrapper-title');
         lineWrapper.setAttribute('class', 'line-wrapper');
 
         titleElement.appendChild(document.createTextNode(name));
@@ -74,6 +75,8 @@ export default class TimeLine {
 
         line.wrapper = element;
         this.wrapper.appendChild(element);
+
+        user.timeLine = line;
 
         this.eventsManager.fireEvent(events.LINE_ADDED, line);
     }

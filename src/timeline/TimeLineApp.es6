@@ -21,21 +21,38 @@ class TimeLineApp {
         this.renderer = this.container.get('renderer');
         this.toolBox = this.container.get('toolbox');
 
+        this.projects = [];
+
         this.init();
         this.initInterface();
-        //this.tempInit();
     }
 
     initInterface() {
-        this.timeLineHeaderWidget = new TimeLineHeaderWidget(Config.startDate, Config.tileSize, Config.tilesPerDay);
+        this.timeLineHeaderWidget = new TimeLineHeaderWidget(Config.startDate, Config.tileSize, Config.tilesPerDay, Config.daysToShow || 14);
         this.timeLineHeaderWidget.createInterface();
 
         new UserLabelWidget(this.eventManager);
     }
 
     init() {
-        // interface
-        this.toolBox.initInterface();
+        // init interface after all data has been loaded
+        let projectPromise = this.container.get('dataManager').getDataManager('project').findAll(),
+            userPromise = this.container.get('dataManager').getDataManager('user').findAll();
+
+        // @todo add timeslice loading to promise list
+
+        Promise.all([projectPromise, userPromise]).then(results => {
+            let entityBank = this.container.get('entityBank');
+
+            entityBank.addBank('projects', results[0]);
+            entityBank.addBank('users', results[1]);
+
+            // init projects
+            this.toolBox.initInterface();
+
+            // init the timeline
+            this.initTimeLine(entityBank.getBank('users'));
+        });
 
         // events
         this.eventManager.bind(Timeline.events.SLICE_ADDED, slice => {
@@ -50,7 +67,7 @@ class TimeLineApp {
 
 
         this.eventManager.bind(Data.events.POST_CREATE, timeSlice => {
-            if (timeSlice) {
+            if (timeSlice && timeSlice instanceof TimeSlice) {
                 this.timeLine.addSlice(timeSlice);
             }
         });
@@ -62,7 +79,7 @@ class TimeLineApp {
         });
 
         this.eventManager.bind(events.POST_REMOVE, timeSlice => {
-            if (timeSlice) {
+            if (timeSlice && timeSlice instanceof TimeSlice) {
                 this.timeLine.removeSlice(timeSlice);
             }
         });
@@ -72,9 +89,6 @@ class TimeLineApp {
                 this.handleNewTimeSliceEvent(event);
             }
         });
-
-        // load all users and init the timeline
-        this.container.get('dataManager').getDataManager('user').findAll().then(users => this.initTimeLine(users));
     }
 
     initTimeLine (users) {
@@ -93,7 +107,7 @@ class TimeLineApp {
 
         groups.forEach(group => {
             let tlGroup = this.timeLine.addGroup(group.name);
-            group.users.forEach(user => tlGroup.addLine(user.name));
+            group.users.forEach(user => tlGroup.addLine(user));
         });
     }
 
@@ -149,14 +163,6 @@ class TimeLineApp {
         updated.forEach(updatedSlice => timeSliceManager.update(updatedSlice));
 
         this.renderer.render(this.timeLine.slices);
-    }
-
-    // temp
-    tempInit() {
-        let itGroup = this.timeLine.addGroup('it');
-
-        itGroup.addLine('Julien Malbrecq');
-        itGroup.addLine('Brieuc Barthelemy');
     }
 }
 
