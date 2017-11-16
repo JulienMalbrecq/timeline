@@ -9,6 +9,7 @@ import {TimeSlice} from './data/entity/TimeSlice.es6';
 import TimeLineHeaderWidget from "./widget/TimeLineHeaderWidget.es6";
 import UserLabelWidget from "./widget/UserLabelWidget.es6";
 import {Config} from "../Config.es6";
+import TimeLineStyleWidget from "./widget/TimeLineStyleWidget.es6";
 
 class TimeLineApp {
     constructor () {
@@ -28,8 +29,11 @@ class TimeLineApp {
     }
 
     initInterface() {
-        this.timeLineHeaderWidget = new TimeLineHeaderWidget(Config.startDate, Config.tileSize, Config.tilesPerDay, Config.daysToShow || 14);
-        this.timeLineHeaderWidget.createInterface();
+        let timeLineHeaderWidget = new TimeLineHeaderWidget(Config.startDate, Config.tileSize, Config.tilesPerDay, Config.daysToShow || 14);
+        timeLineHeaderWidget.initInterface();
+
+        let timeLineStyleWidget = new TimeLineStyleWidget(Config.startDate, Config.tileSize, Config.tilesPerDay);
+        timeLineStyleWidget.initInterface();
 
         new UserLabelWidget(this.eventManager);
     }

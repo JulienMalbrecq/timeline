@@ -20,7 +20,7 @@ export default class TimeLineHeaderWidget {
         return this.tilePerDay * this.tileWidth;
     }
 
-    createInterface() {
+    initInterface() {
         /** @var Node this.wrapper */
         this.wrapper = document.querySelector('[data-widget="timeline-headers"] .time');
         if (!this.wrapper) {
