@@ -2,18 +2,34 @@
 module.exports = function(grunt) {
 
   // Project configuration.
-  grunt.initConfig({
+  grunt.config.init({
+    pkg: grunt.file.readJSON('package.json'),
+
+    tmpDir: 'transformed',
+
     // Metadata.
     meta: {
-      version: '0.1.0'
+      version: '<%= pkg.version %>'
     },
-    banner: '<%= grunt.template.today("yyyy-mm-dd") %>\n',
+
+    banner: '// Release <%= meta.version %>\n',
+
+    bump: {
+      options: {
+        files: ['package.json'],
+        updateConfigs: ['pkg'],
+        commit: false,
+        createTag: false,
+        push: false
+      }
+    },
 
     // Task configuration.
     browserify: {
       dist: {
         files: {
-          'dist/app.js': ['src/**/*.es6']
+          '<%= tmpDir %>/viewer.js': ['src/Viewer.es6'],
+          '<%= tmpDir %>/editor.js': ['src/Editor.es6']
         },
         options: {
           browserifyOptions: {
@@ -43,21 +59,21 @@ module.exports = function(grunt) {
 
       library: {
         src: ['node_modules/fermata/fermata.js'],
-        dest: 'dist/lib.js'
+        dest: '<%= tmpDir %>/lib.js'
       }
     },
 
     uglify: {
       options: {
-        banner: '// <%= banner %>',
-        sourceMap: true,
-        sourceMapIn: 'dist/app.js.map'
+        banner: '<%= banner %>',
+        sourceMap: false
       },
 
       dist: {
         files: {
-          'lib.min.js' : ['dist/lib.js'],
-          'app.min.js' : ['dist/app.js']
+          'dist/lib.min.js' : ['transformed/lib.js'],
+          'dist/editor.min.js' : ['transformed/editor.js'],
+          'dist/viewer.min.js' : ['transformed/viewer.js']
         }
       }
     },
@@ -67,7 +83,9 @@ module.exports = function(grunt) {
         files: ['src/**/*.es6'],
         tasks: ['compile']
       }
-    }
+    },
+
+    clean: ['<%= tmpDir %>']
   });
 
   // These plugins provide necessary tasks.
@@ -78,8 +96,14 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-qunit');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-bump');
 
   // Default task.
   grunt.registerTask('default', ['compile', 'watch']);
-  grunt.registerTask('compile', ['browserify', 'concat:library', 'uglify']);
+  grunt.registerTask('compile', ['concat:library', 'browserify', 'uglify', 'clean']);
+
+  grunt.registerTask('do-release-patch', ['bump:patch', 'compile']);
+  grunt.registerTask('do-release-minor', ['bump:minor', 'compile']);
+  grunt.registerTask('do-release-major', ['bump:major', 'compile']);
 };

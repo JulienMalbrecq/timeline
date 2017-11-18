@@ -1,4 +1,6 @@
 {
+  "name": "Time line manager app",
+  "version": "0.1.6",
   "engines": {
     "node": ">= 0.10.0"
   },
@@ -19,6 +21,9 @@
     "grunt": "~0.4.5",
     "grunt-babel": "^6.0.0",
     "grunt-browserify": "^5.0.0",
+    "grunt-bump": "^0.8.0",
+    "grunt-changed": "^1.1.1",
+    "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-concat": "^0.4.0",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-qunit": "~0.5.2",
